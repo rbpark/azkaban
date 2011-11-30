@@ -16,6 +16,9 @@
 package azkaban.jobs.builtin;
 
 import azkaban.common.utils.Props;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.SecurityUtil;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
@@ -28,7 +31,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.PrivilegedExceptionAction;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,6 +50,12 @@ public class JavaJobRunnerMain {
     public static final String CANCEL_METHOD_PARAM = "method.cancel";
     public static final String RUN_METHOD_PARAM = "method.run";
     public static final String PROPS_CLASS = "azkaban.common.utils.Props";
+
+    // Secure Hadoop proxy user params
+    public static final String ENABLE_PROXYING = "azkaban.should.proxy"; // boolean
+    public static final String PROXY_KEYTAB_LOCATION = "proxy.keytab.location";
+    public static final String PROXY_USER = "proxy.user";
+    public static final String TO_PROXY = "user.to.proxy";
 
     private static final Layout DEFAULT_LAYOUT = new PatternLayout("%p %m\n");
 
@@ -97,9 +108,17 @@ public class JavaJobRunnerMain {
 
             _cancelMethod = prop.getProperty(CANCEL_METHOD_PARAM, DEFAULT_CANCEL_METHOD);
 
-            String runMethod = prop.getProperty(RUN_METHOD_PARAM, DEFAULT_RUN_METHOD);
+            final String runMethod = prop.getProperty(RUN_METHOD_PARAM, DEFAULT_RUN_METHOD);
             _logger.info("Invoking method " + runMethod);
-            _javaObject.getClass().getMethod(runMethod, new Class<?>[] {}).invoke(_javaObject);
+
+            String shouldProxy = prop.getProperty(ENABLE_PROXYING);
+            if(shouldProxy == null || !shouldProxy.equals("true")) {
+              _logger.info("Proxy check failed, not proxying run.");
+              runMethod(_javaObject, runMethod);
+            } else {
+              _logger.info("Proxying enabled.");
+              runMethodAsProxyUser(prop, _javaObject, runMethod);
+            }
             _isFinished = true;
 
             // Get the generated properties and store them to disk, to be read by ProcessJob.
@@ -123,7 +142,37 @@ public class JavaJobRunnerMain {
         }
     }
 
-    private void outputGeneratedProperties(Props outputProperties)
+  private void runMethodAsProxyUser(Properties prop, final Object obj, final String runMethod) throws IOException, InterruptedException {
+    String keytab = verifySecureProperty(prop, PROXY_KEYTAB_LOCATION);
+    String proxyUser = verifySecureProperty(prop, PROXY_USER);
+    String toProxy = verifySecureProperty(prop, TO_PROXY);
+
+    SecurityUtil.login(new Configuration(), keytab, proxyUser);
+    UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
+
+    UserGroupInformation.createProxyUser(toProxy, loginUser)
+                        .doAs(new PrivilegedExceptionAction<Void>() {
+      @Override
+      public Void run() throws Exception {
+        runMethod(obj, runMethod);
+        return null;
+      }
+    });
+  }
+
+  private String verifySecureProperty(Properties properties, String s) throws IOException {
+    String value = properties.getProperty(s);
+
+    if(value == null) throw new IOException(s + " not set in properties. Cannot use secure proxy");
+    _logger.info("Secure proxy configuration: Property " + s + " = " + value);
+    return value;
+  }
+
+  private void runMethod(Object obj, String runMethod) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    obj.getClass().getMethod(runMethod, new Class<?>[] {}).invoke(obj);
+  }
+
+  private void outputGeneratedProperties(Props outputProperties)
     {
         _logger.info("Outputting generated properties to " + ProcessJob.JOB_OUTPUT_PROP_FILE);
         if (outputProperties == null) {
