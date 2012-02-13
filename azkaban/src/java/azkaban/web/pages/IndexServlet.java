@@ -130,21 +130,22 @@ public class IndexServlet extends AbstractAzkabanServlet {
     	ArrayList<Object> rootJobObj = new ArrayList<Object>();
     	for (String root: rootJobs) {
     		Flow flow = manager.getFlow(root);
-    		HashMap<String,Object> flowObj = getJSONDependencyTree(flow);
+    		// Only 2 levels deep in the tree.
+    		HashMap<String,Object> flowObj = getJSONDependencyTree(flow, 0, 2);
     		rootJobObj.add(flowObj);
     	}
     	
     	return JSONUtils.toJSONString(rootJobObj);
     }
     
-	private HashMap<String,Object> getJSONDependencyTree(Flow flow) {
+	private HashMap<String,Object> getJSONDependencyTree(Flow flow, int level, int maxLevel) {
     	HashMap<String,Object> jobObject = new HashMap<String,Object>();
     	jobObject.put("name", flow.getName());
     	
-    	if (flow.hasChildren()) {
+    	if (level < maxLevel && flow.hasChildren()) {
     		ArrayList<HashMap<String,Object>> dependencies = new ArrayList<HashMap<String,Object>>();
     		for(Flow child : flow.getChildren()) {
-    			HashMap<String, Object> childObj = getJSONDependencyTree(child);
+    			HashMap<String, Object> childObj = getJSONDependencyTree(child, level + 1, maxLevel);
     			dependencies.add(childObj);
     		}
     		
