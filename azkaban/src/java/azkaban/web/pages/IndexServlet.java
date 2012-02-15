@@ -177,6 +177,7 @@ public class IndexServlet extends AbstractAzkabanServlet {
 		}
         
         Collection<ExecutingJobAndInstance> executing = app.getJobExecutorManager().getExecutingJobs();
+        boolean found = false;
         for(ExecutingJobAndInstance curr: executing) {
             ExecutableFlow flow = curr.getExecutableFlow();
             final String flowId = flow.getId();
@@ -185,6 +186,7 @@ public class IndexServlet extends AbstractAzkabanServlet {
                 try {
                     if(flow.cancel()) {
                         addMessage(req, "Cancelled " + flowName);
+                        app.getJobExecutorManager().cancel(flowName);
                         logger.info("Job '" + flowName + "' cancelled from gui.");
                     } else {
                         logger.info("Couldn't cancel flow '" + flowName + "' for some reason.");

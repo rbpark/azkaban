@@ -221,7 +221,7 @@
 	<target name="deploy" description="Deploy application" depends="war">
 		<deploy url="${tomcat.manager.url}" username="${tomcat.manager.username}"
 			password="${tomcat.manager.password}" path="${tomcat.context}"
-			update="true" war="file:${module.dist.dir.war}/${name}.war" />
+			update="true" war="file:${module.war.name}" />
 	</target>
 
 	<target name="undeploy" description="Undeploy application">
