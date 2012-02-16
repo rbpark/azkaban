@@ -86,6 +86,11 @@ public class GuiUtils {
         return formatDate(date, "MM-dd-yyyy HH:mm:ss");
     }
 
+
+    public String formatDateTime(long timestamp) {
+        return formatDate(new DateTime(timestamp), "MM-dd-yyyy HH:mm:ss");
+    }
+    
     public String formatDateTimeAndZone(DateTime date) {
         return formatDate(date, "MM-dd-yyyy HH:mm:ss z");
     }

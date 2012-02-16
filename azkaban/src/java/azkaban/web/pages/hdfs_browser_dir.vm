@@ -29,7 +29,6 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         text-align: left;
         font-size: 16pt;
         color: black;
-        width: 600px;
         background-color: white;
         border: 1px solid black;
         margin: auto;
@@ -64,8 +63,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 			        <table class="fileTable">
 			          <tr>
 			            <th>File</th>
+			            <th>Owner</th>
 			            <th>Size</th>
-			            <th></th>
+			            <th>Modified Date</th>
 			          </tr>
 			          #foreach($status in $subdirs)
 			            <tr>
@@ -74,6 +74,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 			                ${status.path.name}#if($status.isDir())/#end
 			              </a>
 			              </td>
+			              <td>
+			              	${status.owner}/${status.group}
+			              </td>
 			              <td style="text-align: center">
 			                #if($status.isDir())
 			                  &ndash;
@@ -81,12 +84,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 			                  $utils.displayBytes(${status.len})
 			                #end
 			              </td>
-			              ##<td>
-			              ##  <form action="${context}/fs" method="post">
-			              ##    <input type="hidden" name="file" value="${status.getPath().toUri().getPath()}"/>
-			              ##    <input type="submit" name="action" value="delete"/>
-			              ##  </form>
-			              ##</td>
+			              <td>
+			                  $utils.formatDateTime(${status.modificationTime})
+			              </td>
 			            </tr>
 			          #end
 			        </table>
