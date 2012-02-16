@@ -63,7 +63,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 			        <table class="fileTable">
 			          <tr>
 			            <th>File</th>
-			            <th>Owner</th>
+			            <th>Owner/Group</th>
 			            <th>Size</th>
 			            <th>Modified Date</th>
 			          </tr>

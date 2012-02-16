@@ -170,11 +170,6 @@ public class IndexServlet extends AbstractAzkabanServlet {
     private void cancelJob(AzkabanApplication app, HttpServletRequest req) throws ServletException {
 
         String jobId = getParam(req, "job");
-        try {
-			app.getJobExecutorManager().cancel(jobId);
-		} catch (Exception e1) {
-			logger.error("Error cancelling job " + e1);
-		}
         
         Collection<ExecutingJobAndInstance> executing = app.getJobExecutorManager().getExecutingJobs();
         boolean found = false;
@@ -186,7 +181,6 @@ public class IndexServlet extends AbstractAzkabanServlet {
                 try {
                     if(flow.cancel()) {
                         addMessage(req, "Cancelled " + flowName);
-                        app.getJobExecutorManager().cancel(flowName);
                         logger.info("Job '" + flowName + "' cancelled from gui.");
                     } else {
                         logger.info("Couldn't cancel flow '" + flowName + "' for some reason.");
@@ -198,6 +192,13 @@ public class IndexServlet extends AbstractAzkabanServlet {
                 }
             }
         }
+        
+        String name = getParam(req, "name");
+        try {
+			app.getJobExecutorManager().cancel(name);
+            logger.error("Error: Had to force deletion for " + name);	
+		} catch (Exception e1) {
+		}
     }
 
     private String scheduleJobs(AzkabanApplication app,

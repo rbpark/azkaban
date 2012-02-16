@@ -90,6 +90,17 @@ public class JobExecutorManager {
         instance.getExecutableFlow().cancel();
     }
 
+    public void cancelAllJobsWithName(String name) throws Exception {
+    	for (Map.Entry<String, ExecutingJobAndInstance> entry: executing.entrySet()) {
+    		if (entry.getValue().getExecutableFlow().getName().equals(name)) {
+    			entry.getValue().getExecutableFlow().cancel();
+                
+    			executing.remove(entry.getKey());
+    		}	
+    	}
+
+    }
+    
     /**
      * Run job file given the id
      * 

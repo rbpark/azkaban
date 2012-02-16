@@ -300,12 +300,18 @@ var indexheaderRowfunc = function(data) {
 	$(inputJob).attr("name", "job");
 	$(inputJob).attr("value", data.id);
 	
+	var inputJobName = document.createElement("input");
+	$(inputJobName).attr("type", "hidden");
+	$(inputJobName).attr("name", "name");
+	$(inputJobName).attr("value", data.name);
+	
 	var inputSubmit = document.createElement("input");
 	$(inputSubmit).attr("type", "submit");
 	$(inputSubmit).attr("value", "Cancel");
 	
 	form.appendChild(inputCancel);
 	form.appendChild(inputJob);
+	form.appendChild(inputJobName);
 	form.appendChild(inputSubmit);
 	
 	var actionTd = document.createElement("td");
