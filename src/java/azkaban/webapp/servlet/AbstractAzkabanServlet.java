@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import azkaban.webapp.AzkabanServer;
+import azkaban.webapp.AzkabanWebServer;
 
 /**
  * Base Servlet for pages
@@ -35,19 +35,19 @@ public class AbstractAzkabanServlet extends HttpServlet {
     public static final String DEFAULT_LOG_URL_PREFIX = "predefined_log_url_prefix";
     public static final String LOG_URL_PREFIX = "log_url_prefix";
 
-    private AzkabanServer application;
+    private AzkabanWebServer application;
 
     /**
      * To retrieve the application for the servlet
      * @return
      */
-    public AzkabanServer getApplication() {
+    public AzkabanWebServer getApplication() {
         return application;
     }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        application = (AzkabanServer) config.getServletContext().getAttribute(
+        application = (AzkabanWebServer) config.getServletContext().getAttribute(
                 AzkabanServletContextListener.AZKABAN_SERVLET_CONTEXT_KEY);
 
         if (application == null) {
@@ -158,8 +158,8 @@ public class AbstractAzkabanServlet extends HttpServlet {
      * @param config
      * @return
      */
-    public static AzkabanServer getApp(ServletConfig config) {
-        AzkabanServer app = (AzkabanServer) config
+    public static AzkabanWebServer getApp(ServletConfig config) {
+        AzkabanWebServer app = (AzkabanWebServer) config
                 .getServletContext()
                 .getAttribute(
                         AzkabanServletContextListener.AZKABAN_SERVLET_CONTEXT_KEY);

@@ -19,7 +19,7 @@ package azkaban.webapp.servlet;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import azkaban.webapp.AzkabanServer;
+import azkaban.webapp.AzkabanWebServer;
 
 /**
  * A ServletContextListener that loads the batch application
@@ -27,7 +27,7 @@ import azkaban.webapp.AzkabanServer;
 public class AzkabanServletContextListener implements ServletContextListener {
     public static final String AZKABAN_SERVLET_CONTEXT_KEY = "azkaban_app";
 
-    private AzkabanServer app;
+    private AzkabanWebServer app;
 
     /**
      * Delete the app
@@ -40,7 +40,7 @@ public class AzkabanServletContextListener implements ServletContextListener {
      * Load the app
      */
     public void contextInitialized(ServletContextEvent event) {
-        this.app = new AzkabanServer();
+        this.app = new AzkabanWebServer();
 
         event.getServletContext().setAttribute(AZKABAN_SERVLET_CONTEXT_KEY,
                 this.app);

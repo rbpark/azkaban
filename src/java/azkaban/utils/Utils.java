@@ -61,4 +61,15 @@ public class Utils {
             return t;
         }
     }
+    
+    /**
+     * Print the message and then exit with the given exit code
+     * 
+     * @param message The message to print
+     * @param exitCode The exit code
+     */
+    public static void croak(String message, int exitCode) {
+        System.err.println(message);
+        System.exit(exitCode);
+    }
 }
