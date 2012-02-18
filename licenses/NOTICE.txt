@@ -1,0 +1,8 @@
+MIT License
+This product includes jopt-simpler, found on http://pholser.github.com/jopt-simple/index.html.
+
+Apache 2.0 License
+This product includes log4j 1.2, found on http://logging.apache.org/log4j/1.2
+This product includes Jetty 6.1, found on http://jetty.codehaus.org/jetty/
+This product includes velocity 1.7, found on http://http://velocity.apache.org/
+This product includes jodatime 2.0, found on http://joda-time.sourceforge.net/

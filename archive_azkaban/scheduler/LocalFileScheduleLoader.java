@@ -103,12 +103,21 @@ public class LocalFileScheduleLoader implements ScheduleLoader {
             	schedules.add(createJSONObject(schedJob));
             }
  
+            FileWriter writer = null;
     		try {
-    			FileWriter writer = new FileWriter(scheduleFile);
+    			writer = new FileWriter(scheduleFile);
     			writer.write(JSONUtils.toJSONString(obj, 4));
     			writer.flush();
     		} catch (Exception e) {
     			throw new RuntimeException("Error saving flow file", e);
+    		} finally {
+    			if (writer != null) {
+    				try {
+    					writer.close();
+    				} catch (Exception e) {
+    					throw new RuntimeException("Error saving flow file", e);
+    				}
+    			}
     		}
         }
 	}

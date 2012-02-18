@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 LinkedIn, Inc
+ * Copyright 2012 LinkedIn, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,7 +14,7 @@
  * the License.
  */
 
-package azkaban.common.web;
+package azkaban.webapp.servlet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,13 +22,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
-import azkaban.common.utils.Utils;
+import azkaban.utils.Utils;
 
 /**
  * A page to display
- * 
- * @author jkreps
- * 
  */
 public class Page {
 
@@ -37,8 +34,15 @@ public class Page {
     private final VelocityEngine engine;
     private final VelocityContext context;
     private final String template;
-    private final GuiUtils utils = new GuiUtils();
 
+    /**
+     * Creates a page and sets up the velocity engine to render
+     * 
+     * @param request
+     * @param response
+     * @param engine
+     * @param template
+     */
     public Page(HttpServletRequest request,
                 HttpServletResponse response,
                 VelocityEngine engine,
@@ -48,11 +52,14 @@ public class Page {
         this.engine = Utils.nonNull(engine);
         this.template = Utils.nonNull(template);
         this.context = new VelocityContext();
-        this.context.put("utils", utils);
+        //this.context.put("utils", guiUtils);
         this.context.put("session", request.getSession(true));
         this.context.put("context", request.getContextPath());
     }
 
+    /**
+     * Renders the page in UTF-8
+     */
     public void render() {
         try {
             engine.mergeTemplate(template, "UTF-8", context, response.getWriter());
@@ -61,6 +68,9 @@ public class Page {
         }
     }
 
+    /**
+     * Adds variables to the velocity context.
+     */
     public void add(String name, Object value) {
         context.put(name, value);
     }

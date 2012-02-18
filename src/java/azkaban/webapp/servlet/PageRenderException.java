@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 LinkedIn, Inc
+ * Copyright 2012 LinkedIn, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,20 +14,15 @@
  * the License.
  */
 
-package azkaban.common.utils;
+package azkaban.webapp.servlet;
 
 /**
- * Indicates that a required property is missing from the Props
- * 
- * @author jkreps
- * 
+ * Thrown if there is an error rendering the page
  */
-public class UndefinedPropertyException extends RuntimeException {
+public class PageRenderException extends RuntimeException {
+    private static final long serialVersionUID = -1;
 
-    private static final long serialVersionUID = 1;
-
-    public UndefinedPropertyException(String message) {
-        super(message);
+    public PageRenderException(Throwable cause) {
+        super(cause);
     }
-
 }
