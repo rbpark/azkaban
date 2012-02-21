@@ -29,8 +29,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.thread.QueuedThreadPool;
-import org.mortbay.thread.ThreadPool;
 
+import azkaban.database.MySQLConnection;
 import azkaban.utils.Props;
 import azkaban.utils.Utils;
 import azkaban.webapp.servlet.AzkabanServletContextListener;
@@ -115,6 +115,9 @@ public class AzkabanWebServer {
             Utils.croak(e.getMessage(), 1);
         }
 
+        MySQLConnection connection = new MySQLConnection(azkabanSettings);
+        connection.connect();
+        
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             public void run() {

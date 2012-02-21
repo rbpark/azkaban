@@ -8,3 +8,8 @@ This product includes commons lang 2.6, found on http://commons.apache.org/colle
 This product includes commons collection 3.2.1, found on http://commons.apache.org/collections/
 This product includes Jetty 6.1, found on http://jetty.codehaus.org/jetty/
 This product includes jodatime 2.0, found on http://joda-time.sourceforge.net/
+
+MySQL Driver
+This project includes mysql-connector-java-5.1.18. It is distributed under the 
+Oracle’s FOSS License Exception for Apache 2.0 License applications.
+
