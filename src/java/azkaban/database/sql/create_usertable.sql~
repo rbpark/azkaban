@@ -1,0 +1,11 @@
+CREATE TABLE user_accounts (
+  id INT,
+  PRIMARY KEY(id),
+  username VARCHAR(16) NOT NULL,
+  INDEX (username),
+  email VARCHAR(64),
+  password_hash BINARY(32),
+  password_salt BINARY(8),
+  update_time TIMESTAMP,
+  create_time TIMESTAMP
+);

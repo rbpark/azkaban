@@ -26,6 +26,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.thread.QueuedThreadPool;
@@ -95,12 +96,22 @@ public class AzkabanWebServer {
         }
         AzkabanWebServer app = new AzkabanWebServer(azkabanSettings);
         
-        int portNumber = azkabanSettings.getInt("jetty.port", DEFAULT_PORT_NUMBER);
+        int portNumber = azkabanSettings.getInt("jetty.ssl.port", DEFAULT_PORT_NUMBER);
         int maxThreads = azkabanSettings.getInt("jetty.maxThreads", DEFAULT_THREAD_NUMBER);
 
         logger.info("Setting up Jetty Server with port:" + portNumber + " and numThreads:" + maxThreads);
         
-        final Server server = new Server(portNumber);
+        final Server server = new Server();
+        SslSocketConnector secureConnector = new SslSocketConnector();
+        secureConnector.setPort(portNumber);
+        secureConnector.setKeystore(azkabanSettings.getString("jetty.keystore"));
+        secureConnector.setPassword(azkabanSettings.getString("jetty.password"));
+        secureConnector.setKeyPassword(azkabanSettings.getString("jetty.keypassword"));
+        secureConnector.setTruststore(azkabanSettings.getString("jetty.truststore"));
+        secureConnector.setTrustPassword(azkabanSettings.getString("jetty.trustpassword"));
+        
+        server.addConnector(secureConnector);
+        
         QueuedThreadPool httpThreadPool = new QueuedThreadPool(maxThreads);
         server.setThreadPool(httpThreadPool);
         
@@ -116,8 +127,7 @@ public class AzkabanWebServer {
         }
 
         MySQLConnection connection = new MySQLConnection(azkabanSettings);
-        connection.connect();
-        
+
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             public void run() {

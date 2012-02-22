@@ -1,0 +1,6 @@
+id INT NON-NULL PRIMARY
+username VARCHAR NON-NULL INDEX
+email VARCHAR NON-NULL
+passwordhash BINARY(16) NULL
+passwordsalt INT NULL
+createdate TIMESTAMP NON-NULL
