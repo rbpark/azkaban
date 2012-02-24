@@ -1,0 +1,32 @@
+<!DOCTYPE html> 
+<html>
+  <head>
+    <head>
+    <title>#appname()</title>
+    <link rel="stylesheet" type="text/css" href="${context}/static/css/azkaban.css">    
+    <link rel="shortcut icon" href="${context}/static/favicon.ico" />
+    #parse( "azkaban/webapp/servlet/velocity/style.vm" )
+  </head>
+  <body>
+    <div class="header">
+    #parse("azkaban/webapp/servlet/velocity/title.vm" )
+    </div>
+    
+    <div id="login" class="shadow-box">
+    	<div class="box-title">Login</div>
+    	#if($errorMsg)
+    		<div class="box-error-message">$errorMsg</div>
+    	#end
+    	<form class="login-form" method="post">
+	    	<p>Username</p>
+	    	<input type="text" name="username" class="login-textbox" ></input>
+	    	<p>Password</p>
+	    	<input type="password" name="password" class="login-textbox"></input>
+	    	<br>
+	    	<input type="hidden" name="action" value="login"></input>
+	    	<input type="submit" value="login" class="login-submit"/>
+    	</form>
+    </div>
+  </body>
+</html>
+

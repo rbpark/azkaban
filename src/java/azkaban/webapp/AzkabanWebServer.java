@@ -28,6 +28,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.thread.QueuedThreadPool;
 
@@ -36,6 +37,8 @@ import azkaban.utils.Props;
 import azkaban.utils.Utils;
 import azkaban.webapp.servlet.AzkabanServletContextListener;
 import azkaban.webapp.servlet.IndexServlet;
+import azkaban.webapp.session.JNDIHelper;
+import azkaban.webapp.session.SessionCache;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -53,9 +56,12 @@ public class AzkabanWebServer {
     private static final int DEFAULT_PORT_NUMBER = 8081;
     private static final int DEFAULT_THREAD_NUMBER = 10;
     private static final String VELOCITY_DEV_MODE_PARAM = "velocity.dev.mode";
+    private static final String DEFAULT_STATIC_DIR = "";
     
     private final VelocityEngine velocityEngine;
     private Props props;
+    private SessionCache sessionCache;
+    private JNDIHelper jndiHelper;
     
     /**
      * Azkaban using Jetty
@@ -109,14 +115,18 @@ public class AzkabanWebServer {
         secureConnector.setKeyPassword(azkabanSettings.getString("jetty.keypassword"));
         secureConnector.setTruststore(azkabanSettings.getString("jetty.truststore"));
         secureConnector.setTrustPassword(azkabanSettings.getString("jetty.trustpassword"));
-        
         server.addConnector(secureConnector);
         
         QueuedThreadPool httpThreadPool = new QueuedThreadPool(maxThreads);
         server.setThreadPool(httpThreadPool);
         
+        String staticDir = azkabanSettings.getString("web.resource.dir", DEFAULT_STATIC_DIR);
+        logger.info("Setting up web resource dir " + staticDir);
         Context root = new Context(server, "/", Context.SESSIONS);
-        root.addServlet(new ServletHolder(new IndexServlet()), "/index");
+
+        root.setResourceBase(staticDir);
+        root.addServlet(new ServletHolder(new DefaultServlet()), "/static/*");
+        root.addServlet(new ServletHolder(new IndexServlet()), "/");
         root.setAttribute(AzkabanServletContextListener.AZKABAN_SERVLET_CONTEXT_KEY, app);
         
         try {
@@ -125,8 +135,6 @@ public class AzkabanWebServer {
             logger.warn(e);
             Utils.croak(e.getMessage(), 1);
         }
-
-        MySQLConnection connection = new MySQLConnection(azkabanSettings);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
@@ -209,6 +217,19 @@ public class AzkabanWebServer {
     public AzkabanWebServer(Props props) {
         this.props = props;
         velocityEngine = configureVelocityEngine(props.getBoolean(VELOCITY_DEV_MODE_PARAM, false));
+        sessionCache = new SessionCache(props);
+        jndiHelper = new JNDIHelper(props);
+        jndiHelper.getUser("rpark", "");
+        MySQLConnection connection = new MySQLConnection(props);
+    }
+    
+    /**
+     * Returns the web session cache.
+     * 
+     * @return
+     */
+    public SessionCache getSessionCache() {
+    	return sessionCache;
     }
     
     /**
@@ -251,5 +272,13 @@ public class AzkabanWebServer {
                            Logger.getLogger("org.apache.velocity.Logger"));
         engine.setProperty("parser.pool.size", 3);
         return engine;
+    }
+    
+    /**
+     * Returns the global azkaban properties
+     * @return
+     */
+    public Props getAzkabanProps() {
+    	return props;
     }
 }

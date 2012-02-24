@@ -27,20 +27,20 @@ import org.apache.log4j.Logger;
 /**
  * The main page
  */
-public class IndexServlet extends LoginAbstractAzkabanServlet {
-    private static final Logger logger = Logger.getLogger(IndexServlet.class.getName());
+public class LoginServlet extends AbstractAzkabanServlet {
+    private static final Logger logger = Logger.getLogger(LoginServlet.class.getName());
 
     private static final long serialVersionUID = -1;
 
     @Override
-    protected void handleGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
             IOException {
-        Page page = newPage(req, resp, "azkaban/webapp/servlet/velocity/index.vm");
+        Page page = newPage(req, resp, "azkaban/webapp/servlet/velocity/login.vm");
         page.render();
     }
 
     @Override
-    protected void handlePost(HttpServletRequest req, HttpServletResponse resp)
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         resp.sendRedirect(req.getContextPath());
     }

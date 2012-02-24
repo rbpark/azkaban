@@ -1,0 +1,11 @@
+  <style type="text/css">
+	.enviro-name {
+		color: ${azkaban_color};
+	}
+	.header {
+		border-top-color: ${azkaban_color};
+	}
+	.nav .selected a {
+	  border-bottom-color: ${azkaban_color};
+	}
+  </style>

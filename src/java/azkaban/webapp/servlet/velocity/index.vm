@@ -1,12 +1,15 @@
-<!DOCTYPE html
-PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html> 
+<html>
   <head>
+    <head>
     <title>#appname()</title>
+    <link rel="stylesheet" type="text/css" href="${context}/static/css/azkaban.css">    
+    <link rel="shortcut icon" href="${context}/static/favicon.ico" />
+    #parse( "azkaban/webapp/servlet/velocity/style.vm" )
   </head>
   <body>
- 	<p>Hello</p>
+    #set($current_page="all")
+    #parse( "azkaban/webapp/servlet/velocity/nav.vm" )
   </body>
 </html>
 

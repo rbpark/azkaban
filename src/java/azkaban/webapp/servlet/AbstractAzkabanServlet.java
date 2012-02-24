@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import azkaban.utils.Props;
 import azkaban.webapp.AzkabanWebServer;
 
 /**
@@ -36,7 +37,10 @@ public class AbstractAzkabanServlet extends HttpServlet {
     public static final String LOG_URL_PREFIX = "log_url_prefix";
 
     private AzkabanWebServer application;
-
+    private String name;
+    private String label;
+    private String color;
+    
     /**
      * To retrieve the application for the servlet
      * @return
@@ -53,6 +57,11 @@ public class AbstractAzkabanServlet extends HttpServlet {
         if (application == null) {
             throw new IllegalStateException("No batch application is defined in the servlet context!");
         }
+        
+        Props props = application.getAzkabanProps();
+        name = props.getString("azkaban.name", "");
+        label = props.getString("azkaban.label", "");
+        color = props.getString("azkaban.color", "#FF0000");
     }
 
     /**
@@ -63,7 +72,7 @@ public class AbstractAzkabanServlet extends HttpServlet {
      * @return
      */
     public boolean hasParam(HttpServletRequest request, String param) {
-        return request.getParameter(param) != null;
+        return request.getParameter(param) != null && !request.getParameter(param).isEmpty();
     }
 
     /**
@@ -150,6 +159,9 @@ public class AbstractAzkabanServlet extends HttpServlet {
      */
     protected Page newPage(HttpServletRequest req, HttpServletResponse resp, String template) {
         Page page = new Page(req, resp, application.getVelocityEngine(), template);
+        page.add("azkaban_name", name);
+        page.add("azkaban_label", label);
+        page.add("azkaban_color", color);
         return page;
     }
 
