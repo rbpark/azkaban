@@ -23,7 +23,7 @@ public class JNDIHelper {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void getUser(String user, String password) {
+	public void getUser(String user, String password) throws NamingException {
 		String jndiSecurityPrincipal = jndiSecurityPrincipalPattern.replaceAll("\\$\\{username\\}", user);
 		System.out.println("Using the following: " + jndiSecurityPrincipal);
 		Hashtable env = new Hashtable();
@@ -32,14 +32,7 @@ public class JNDIHelper {
 		env.put(Context.SECURITY_AUTHENTICATION, jndiSecurityAuthentication);
 		env.put(Context.SECURITY_PRINCIPAL, jndiSecurityPrincipal);
 		env.put(Context.SECURITY_CREDENTIALS, password);
-		
-		try {
-			DirContext ctx = new InitialDirContext(env);
-//			ctx.list("cn");
-//			System.out.println(ctx.getAttributes("cn"));
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		DirContext ctx = new InitialDirContext(env);
 	}
 }

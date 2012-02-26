@@ -3,6 +3,7 @@ package azkaban.webapp.servlet;
 import java.io.IOException;
 import java.util.UUID;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
+import azkaban.webapp.session.JNDIHelper;
 import azkaban.webapp.session.Session;
 
 /**
@@ -83,10 +85,20 @@ public abstract class LoginAbstractAzkabanServlet extends
 			if (action.equals("login")) {
 				if (hasParam(req, "username") && hasParam(req, "password")) {
 					String username = getParam(req, "username");
-					String password = getParam(req, "password");	
+					String password = getParam(req, "password");
+					
+					JNDIHelper helper = getApplication().getJNDIHelper();
+					try {
+						helper.getUser(username, password);
+					} catch (NamingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						System.err.println(e.getExplanation());
+					}
+					
 					// Validate
-					Session session = new Session(username);
-					getApplication().getSessionCache().addSession(UUID.randomUUID().toString(), session);
+					//Session session = new Session(username);
+					//getApplication().getSessionCache().addSession(UUID.randomUUID().toString(), session);
 					handleGet(req, resp);
 				}
 				else {

@@ -219,7 +219,7 @@ public class AzkabanWebServer {
         velocityEngine = configureVelocityEngine(props.getBoolean(VELOCITY_DEV_MODE_PARAM, false));
         sessionCache = new SessionCache(props);
         jndiHelper = new JNDIHelper(props);
-        jndiHelper.getUser("rpark", "");
+       // jndiHelper.getUser("rpark", "");
         MySQLConnection connection = new MySQLConnection(props);
     }
     
@@ -239,6 +239,14 @@ public class AzkabanWebServer {
      */
     public VelocityEngine getVelocityEngine() {
         return velocityEngine;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public JNDIHelper getJNDIHelper() {
+    	return jndiHelper;
     }
     
     /**
