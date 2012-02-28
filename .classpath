@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="azkaban-common/src/java"/>
+	<classpathentry kind="src" path="webforwarder/src/java"/>
 	<classpathentry kind="src" path="azkaban/src/unit"/>
 	<classpathentry kind="src" path="azkaban/src/java"/>
+	<classpathentry kind="src" path="web"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-2.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-5.1.4.jar"/>
@@ -38,5 +40,9 @@
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-core-1.12.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-server-1.12.jar"/>
+	<classpathentry kind="lib" path="lib/asm-3.3.1.jar"/>
+	<classpathentry kind="lib" path="webforwarder/src/java/azkaban/web/WebForwarder.java"/>
 	<classpathentry kind="output" path="dist/classes"/>
 </classpath>
