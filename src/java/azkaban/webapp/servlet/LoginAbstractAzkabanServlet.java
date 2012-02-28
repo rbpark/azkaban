@@ -3,17 +3,16 @@ package azkaban.webapp.servlet;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import azkaban.webapp.session.JNDIHelper;
 import azkaban.webapp.session.Session;
+import azkaban.webapp.user.User;
+import azkaban.webapp.user.UserManager;
 
 /**
  * Abstract Servlet that handles auto login when the session hasn't been
@@ -24,20 +23,18 @@ public abstract class LoginAbstractAzkabanServlet extends
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger logger = Logger.getLogger(AbstractAzkabanServlet.class.getName());
+	private static final Logger logger = Logger.getLogger(LoginAbstractAzkabanServlet.class.getName());
 	private static final String SESSION_ID_NAME = "azkaban.session.id";
-	// This is set really high because its the session cache that really takes care of it.
-	private static final int MAX_SESSION_AGE_IN_SEC = 86400;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		// Set session id
-		//Session session = getSessionFromRequest(req);
-		Session session = null;
+	    Session session = getSessionFromRequest(req);
 		if (session != null) {
-			handleGet(req, resp);
+		    logger.info("Found session " + session.getUser());
+			handleGet(req, resp, session);
 		}
 		else {
 			handleLogin(req, resp);
@@ -50,6 +47,7 @@ public abstract class LoginAbstractAzkabanServlet extends
 		for(Cookie cookie : cookies) {
 			if (SESSION_ID_NAME.equals(cookie.getName())) {
 				sessionId = cookie.getValue();
+				logger.info("Session id " + sessionId);
 			}
 		}
 		
@@ -87,36 +85,42 @@ public abstract class LoginAbstractAzkabanServlet extends
 					String username = getParam(req, "username");
 					String password = getParam(req, "password");
 					
-					JNDIHelper helper = getApplication().getJNDIHelper();
-					try {
-						helper.getUser(username, password);
-					} catch (NamingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						System.err.println(e.getExplanation());
-					}
+					UserManager manager = getApplication().getUserManager();
 					
-					// Validate
-					//Session session = new Session(username);
-					//getApplication().getSessionCache().addSession(UUID.randomUUID().toString(), session);
-					handleGet(req, resp);
+					User user = manager.getUser(username, password);
+					if (user == null) {
+						handleLogin(req, resp, "Could not find user.");
+					}
+					else if (user.getError() != null) {
+						handleLogin(req, resp, user.getErrorMsg());
+					}
+					else {
+						// Validate
+						Session session = new Session(user);
+						String randomUID = UUID.randomUUID().toString();
+						resp.addCookie(new Cookie(SESSION_ID_NAME, randomUID));
+						getApplication().getSessionCache().addSession(randomUID, session);
+						handleGet(req, resp, session);
+					}
 				}
 				else {
 					handleLogin(req, resp, "Enter username and password");
 				}
 			}
 			else {
-				handlePost(req, resp);
+			    Session session = getSessionFromRequest(req);
+				handlePost(req, resp, session);
 			}
 		}
 		else {
-			handlePost(req, resp);
+			Session session = getSessionFromRequest(req);
+			handlePost(req, resp, session);
 		}
 	}
 	
 	protected abstract void handleGet(HttpServletRequest req,
-			HttpServletResponse resp) throws ServletException, IOException;
+			HttpServletResponse resp, Session session) throws ServletException, IOException;
 
 	protected abstract void handlePost(HttpServletRequest req,
-			HttpServletResponse resp) throws ServletException, IOException;
+			HttpServletResponse resp, Session session) throws ServletException, IOException;
 }

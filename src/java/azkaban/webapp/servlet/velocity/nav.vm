@@ -8,4 +8,6 @@
       <li #if($current_page == 'history')class="selected"#end><a href="$!context/history">History</a></li>
       <li><a href="$!context/fs">HDFS</a></li>
     </ul>
+    
+    <div id="user-menu"><a href="#">${user_id}</a><div id="user-down"></div></div>
   </div>

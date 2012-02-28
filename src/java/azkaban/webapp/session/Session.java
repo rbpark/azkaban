@@ -1,13 +1,15 @@
 package azkaban.webapp.session;
 
+import azkaban.webapp.user.User;
+
 public class Session {
-	private final String user;
+	private final User user;
 	
-	public Session(String user) {
+	public Session(User user) {
 		this.user = user;
 	}
 
-	public String getUser() {
+	public User getUser() {
 		return user;
 	}
 }

@@ -37,8 +37,9 @@ import azkaban.utils.Props;
 import azkaban.utils.Utils;
 import azkaban.webapp.servlet.AzkabanServletContextListener;
 import azkaban.webapp.servlet.IndexServlet;
-import azkaban.webapp.session.JNDIHelper;
 import azkaban.webapp.session.SessionCache;
+import azkaban.webapp.user.DefaultUserManager;
+import azkaban.webapp.user.UserManager;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -56,12 +57,130 @@ public class AzkabanWebServer {
     private static final int DEFAULT_PORT_NUMBER = 8081;
     private static final int DEFAULT_THREAD_NUMBER = 10;
     private static final String VELOCITY_DEV_MODE_PARAM = "velocity.dev.mode";
+    private static final String USER_MANAGER_CLASS_PARAM = "user.manager.class";
     private static final String DEFAULT_STATIC_DIR = "";
     
     private final VelocityEngine velocityEngine;
+    private UserManager userManager;
     private Props props;
     private SessionCache sessionCache;
-    private JNDIHelper jndiHelper;
+  
+    /**
+     * Constructor usually called by tomcat AzkabanServletContext to create 
+     * the initial server
+     */
+    public AzkabanWebServer() {
+        this(loadConfigurationFromAzkabanHome());
+    }
+    
+    /**
+	 * Constructor
+	 */
+    public AzkabanWebServer(Props props) {
+        this.props = props;
+        velocityEngine = configureVelocityEngine(props.getBoolean(VELOCITY_DEV_MODE_PARAM, false));
+        sessionCache = new SessionCache(props);
+        userManager = loadUserManager(props);
+        
+       // jndiHelper.getUser("rpark", "");
+        MySQLConnection connection = new MySQLConnection(props);
+    }
+    
+    private UserManager loadUserManager(Props props) {
+        Class<?> userManagerClass = props.getClass(USER_MANAGER_CLASS_PARAM, null);
+        logger.info("Loading user manager class " + userManagerClass.getName());
+        UserManager manager = null;
+        
+        if (userManagerClass != null && userManagerClass.getConstructors().length > 0) {
+        	if (userManagerClass.getConstructors().length > 0) {
+	        	try {
+	        		manager = (UserManager)userManagerClass.getConstructors()[0].newInstance();
+				} catch (Exception e) {
+					logger.error("Could not instantiate UserManager " + userManagerClass.getName());
+					throw new RuntimeException(e);
+				}
+        	}
+        	else {
+				logger.error("Could not instantiate UserManager. No empty constructor for " + userManagerClass.getName());
+				throw new RuntimeException("UserManager empty constructor doesn't exist for " + userManagerClass.getName());
+        	}
+            manager.init(props);
+        }
+        else {
+        	manager = new DefaultUserManager();
+            manager.init(props);
+        }
+        
+        return manager;
+    }
+    
+    /**
+     * Returns the web session cache.
+     * 
+     * @return
+     */
+    public SessionCache getSessionCache() {
+    	return sessionCache;
+    }
+    
+    /**
+     * Returns the velocity engine for pages to use.
+     * 
+     * @return
+     */
+    public VelocityEngine getVelocityEngine() {
+        return velocityEngine;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public UserManager getUserManager() {
+    	return userManager;
+    }
+    
+    /**
+     * Creates and configures the velocity engine.
+     * 
+     * @param devMode
+     * @return
+     */
+    private VelocityEngine configureVelocityEngine(final boolean devMode) {
+        VelocityEngine engine = new VelocityEngine();
+        engine.setProperty("resource.loader", "classpath");
+        engine.setProperty("classpath.resource.loader.class",
+                           ClasspathResourceLoader.class.getName());
+        engine.setProperty("classpath.resource.loader.cache", !devMode);
+        engine.setProperty("classpath.resource.loader.modificationCheckInterval", 5L);
+        engine.setProperty("resource.manager.logwhenfound", false);
+        engine.setProperty("input.encoding", "UTF-8");
+        engine.setProperty("output.encoding", "UTF-8");
+        engine.setProperty("directive.foreach.counter.name", "idx");
+        engine.setProperty("directive.foreach.counter.initial.value", 0);
+        engine.setProperty("directive.set.null.allowed", true);
+        engine.setProperty("resource.manager.logwhenfound", false);
+        engine.setProperty("velocimacro.permissions.allow.inline", true);
+        engine.setProperty("velocimacro.library.autoreload", devMode);
+        engine.setProperty("velocimacro.library", "/azkaban/webapp/servlet/velocity/macros.vm");
+        engine.setProperty("velocimacro.permissions.allow.inline.to.replace.global", true);
+        engine.setProperty("velocimacro.arguments.strict", true);
+        engine.setProperty("runtime.log.invalid.references", devMode);
+        engine.setProperty("runtime.log.logsystem.class", Log4JLogChute.class);
+        engine.setProperty("runtime.log.logsystem.log4j.logger",
+                           Logger.getLogger("org.apache.velocity.Logger"));
+        engine.setProperty("parser.pool.size", 3);
+        return engine;
+    }
+    
+    /**
+     * Returns the global azkaban properties
+     * @return
+     */
+    public Props getAzkabanProps() {
+    	return props;
+    }
+    
     
     /**
      * Azkaban using Jetty
@@ -201,92 +320,5 @@ public class AzkabanWebServer {
         }
         
         return null;
-    }
-    
-    /**
-     * Constructor usually called by tomcat AzkabanServletContext to create 
-     * the initial server
-     */
-    public AzkabanWebServer() {
-        this(loadConfigurationFromAzkabanHome());
-    }
-    
-    /**
-	 * Constructor
-	 */
-    public AzkabanWebServer(Props props) {
-        this.props = props;
-        velocityEngine = configureVelocityEngine(props.getBoolean(VELOCITY_DEV_MODE_PARAM, false));
-        sessionCache = new SessionCache(props);
-        jndiHelper = new JNDIHelper(props);
-       // jndiHelper.getUser("rpark", "");
-        MySQLConnection connection = new MySQLConnection(props);
-    }
-    
-    /**
-     * Returns the web session cache.
-     * 
-     * @return
-     */
-    public SessionCache getSessionCache() {
-    	return sessionCache;
-    }
-    
-    /**
-     * Returns the velocity engine for pages to use.
-     * 
-     * @return
-     */
-    public VelocityEngine getVelocityEngine() {
-        return velocityEngine;
-    }
-    
-    /**
-     * 
-     * @return
-     */
-    public JNDIHelper getJNDIHelper() {
-    	return jndiHelper;
-    }
-    
-    /**
-     * Creates and configures the velocity engine.
-     * 
-     * @param devMode
-     * @return
-     */
-    private VelocityEngine configureVelocityEngine(final boolean devMode) {
-        VelocityEngine engine = new VelocityEngine();
-        engine.setProperty("resource.loader", "classpath");
-        engine.setProperty("classpath.resource.loader.class",
-                           ClasspathResourceLoader.class.getName());
-        engine.setProperty("classpath.resource.loader.cache", !devMode);
-        engine.setProperty("classpath.resource.loader.modificationCheckInterval", 5L);
-        engine.setProperty("resource.manager.logwhenfound", false);
-        engine.setProperty("input.encoding", "UTF-8");
-        engine.setProperty("output.encoding", "UTF-8");
-        engine.setProperty("directive.foreach.counter.name", "idx");
-        engine.setProperty("directive.foreach.counter.initial.value", 0);
-        engine.setProperty("directive.set.null.allowed", true);
-        engine.setProperty("resource.manager.logwhenfound", false);
-        engine.setProperty("velocimacro.permissions.allow.inline", true);
-        engine.setProperty("velocimacro.library.autoreload", devMode);
-        engine.setProperty("velocimacro.library", "/azkaban/webapp/servlet/velocity/macros.vm");
-        engine.setProperty("velocimacro.permissions.allow.inline.to.replace.global", true);
-        engine.setProperty("velocimacro.arguments.strict", true);
-        engine.setProperty("runtime.log.invalid.references", devMode);
-        engine.setProperty("runtime.log.logsystem.class", Log4JLogChute.class);
-        engine.setProperty("runtime.log.logsystem.log4j.logger",
-                           Logger.getLogger("org.apache.velocity.Logger"));
-        engine.setProperty("parser.pool.size", 3);
-        return engine;
-    }
-    
-    /**
-     * Returns the global azkaban properties
-     * @return
-     */
-    public Props getAzkabanProps() {
-    	return props;
     }
 }

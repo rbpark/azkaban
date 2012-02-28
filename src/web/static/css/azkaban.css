@@ -558,7 +558,32 @@ tr:hover td {
   border-color: #CCC;
 }
 
+#user-menu {
+  position: absolute;
+  right:45px;
+  top: 25px;
+}
 
+#user-menu a {
+  color: white;
+  text-decoration: none;
+}
+
+#user-menu a:hover {
+  text-decoration: underline;
+}
+
+#user-down {
+  float: right;
+  background-image: url("../js/jqueryui/themes/custom-theme/images/ui-icons_cccccc_256x240.png");
+  height: 16px;
+  width: 16px;
+  background-position: -64px -16px;
+}
+
+#user-down:hover {
+  cursor: pointer;
+}
 
 /* old styles */
 
@@ -566,11 +591,11 @@ tr:hover td {
 	background-image: url("../../js/jqueryui/themes/custom-theme/images/ui-icons_cccccc_256x240.png");
 	background-position: 0 -16px;
 	height: 16px;
-  margin-left: 15px;
+	margin-left: 15px;
 	width: 16px;
 	cursor: pointer;
 }
 
-.azkaban-charts .expandable-hitarea { 	background-position: -32px -16px; }
-.azkaban-charts .expandable-hitarea.collapse { 	background-position: 0 -16px; }
+.azkaban-charts .expandable-hitarea { background-position: -32px -16px; }
+.azkaban-charts .expandable-hitarea.collapse { background-position: 0 -16px; }
 /* clean up */

@@ -32,7 +32,7 @@ public class SessionCache {
 			return null;
 		}
 		
-		return (Session)elem.getValue();
+		return (Session)elem.getObjectValue();
 	}
 	
 	public void addSession(String id, Session session) {

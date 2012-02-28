@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import azkaban.utils.Props;
 import azkaban.webapp.AzkabanWebServer;
+import azkaban.webapp.session.Session;
 
 /**
  * Base Servlet for pages
@@ -150,6 +151,23 @@ public class AbstractAzkabanServlet extends HttpServlet {
     }
 
     /**
+     * Creates a new velocity page to use. With session.
+     * 
+     * @param req
+     * @param resp
+     * @param template
+     * @return
+     */
+    protected Page newPage(HttpServletRequest req, HttpServletResponse resp, Session session, String template) {
+        Page page = new Page(req, resp, application.getVelocityEngine(), template);
+        page.add("azkaban_name", name);
+        page.add("azkaban_label", label);
+        page.add("azkaban_color", color);
+        page.add("user_id", session.getUser().getUserId());
+        return page;
+    }
+
+    /**
      * Creates a new velocity page to use.
      * 
      * @param req
@@ -164,7 +182,7 @@ public class AbstractAzkabanServlet extends HttpServlet {
         page.add("azkaban_color", color);
         return page;
     }
-
+    
     /**
      * Retrieve the Azkaban application
      * @param config

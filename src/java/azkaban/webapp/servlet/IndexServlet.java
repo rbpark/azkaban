@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import azkaban.webapp.session.Session;
+
 /**
  * The main page
  */
@@ -33,14 +35,14 @@ public class IndexServlet extends LoginAbstractAzkabanServlet {
     private static final long serialVersionUID = -1;
 
     @Override
-    protected void handleGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+    protected void handleGet(HttpServletRequest req, HttpServletResponse resp, Session session) throws ServletException,
             IOException {
-        Page page = newPage(req, resp, "azkaban/webapp/servlet/velocity/index.vm");
+        Page page = newPage(req, resp, session, "azkaban/webapp/servlet/velocity/index.vm");
         page.render();
     }
 
     @Override
-    protected void handlePost(HttpServletRequest req, HttpServletResponse resp)
+    protected void handlePost(HttpServletRequest req, HttpServletResponse resp, Session session)
             throws ServletException, IOException {
         resp.sendRedirect(req.getContextPath());
     }
