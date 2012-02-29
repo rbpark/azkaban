@@ -39,4 +39,8 @@ public class SessionCache {
 		Element elem = new Element(id, session);
 		cache.put(elem);
 	}
+	
+	public boolean removeSession(String id) {
+		return cache.remove(id);
+	}
 }

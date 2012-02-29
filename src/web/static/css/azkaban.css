@@ -10,7 +10,7 @@ input[type=file] { ime-mode: disabled !important; }
 
 body {
   background-color: #f0f0f0;
-  font-family: Arial,Helvetica,"Nimbus Sans L",sans-serif;
+  font-family: Helvetica, Arial, Sans-Serif;
 }
 
 .header {
@@ -124,7 +124,6 @@ body {
      
 .section-hd h2 {
   float: left;
-  font-family: Arial;
   font-size: 125%;
   font-weight: bold;
 }
@@ -227,10 +226,15 @@ tr:hover td {
 /* green */
 .btn1 {
   background: -moz-linear-gradient(center top , #AFD47B 0pt, #AFD47B 1px, #8BC03F 1px, #69A219 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, color-stop(0,#AFD47B), color-stop(5%,#8BC03F),color-stop(100%,#69A219));
   border-color: #669933;
   color: #fff;
 }
-  
+.btn1:hover {
+  background: -moz-linear-gradient(center top , #AFE47B 0pt, #AFE47B 1px, #8BD03F 1px, #69B219 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, color-stop(0,#AFE47B), color-stop(5%,#8BD03F),color-stop(100%,#69B219));
+}
+
 .section-hd .btn1,
 .section-hd .btn4,
 .section-ft .btn1,
@@ -242,8 +246,13 @@ tr:hover td {
 /* blue */
 .btn2 {
   background: -moz-linear-gradient(center top , #73AEC9 0pt, #73AEC9 1px, #338AB0 1px, #0571A6 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, color-stop(0,#73AEC9), color-stop(5%,#338AB0),color-stop(100%,#0571A6));
   border-color: #045A8B;
   color: #fff;
+}
+.btn2:hover {
+  background: -moz-linear-gradient(center top , #83BED9 0pt, #83BED9 1px, #43AAC0 1px, #1581B6 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, color-stop(0,#83BED9), color-stop(5%,#43AAC0),color-stop(100%,#1581B6));
 }
 /* grey */
 .btn3 {
@@ -259,6 +268,8 @@ tr:hover td {
 /* white */
 .btn4 {
   background: -moz-linear-gradient(center top , white 0pt, #ECECEC 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, from(#FFF), to(#ECECEC));
+  
   border-color: #ccc;
   color: #585858;
   display: inline-block;
@@ -273,14 +284,15 @@ tr:hover td {
   border: 1px solid;
   border-color: #7C7C7C #C3C3C3 #DDDDDD;
   float: right;
-  height: 16px;
+  height: 18px;
   line-height: 12px;
   padding: 4px 2px 0;
   width: 310px;
 }
 
 .search-btn {
-  background: url(http://static01.linkedin.com/scds/common/u/img/sprite/sprite_global_v6.png) repeat-x scroll 0 -1130px #DCDCDC;
+  background: -moz-linear-gradient(center top , #E8E8E8 0pt, #CCC 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, from(#E8E8E8), to(#CCC));
   border: 1px solid #999;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
@@ -288,7 +300,14 @@ tr:hover td {
   color: #666;
   float: right;
   font-weight: bold;
-  height: 22px;
+  height: 24px;
+  font-size: 10pt;
+}
+
+.search-btn:hover {
+  background: -moz-linear-gradient(center top , #F0F0F0 0pt, #DDD 100%) repeat scroll 0 0 transparent;
+  background: -webkit-gradient(linear, center top, center bottom, from(#F0F0F0), to(#DDD));
+  cursor: pointer;
 }
 
 #scheduled-jobs-content,
@@ -558,18 +577,22 @@ tr:hover td {
   border-color: #CCC;
 }
 
-#user-menu {
+#user-id {
   position: absolute;
-  right:45px;
-  top: 25px;
+  right:40px;
+  top: 28px;
+  font-size: 100%;
+  height: 40px;
+  margin: 3px;
 }
 
-#user-menu a {
-  color: white;
+#user-id a {
+  color: #CCC;
   text-decoration: none;
+  cursor: pointer;
 }
 
-#user-menu a:hover {
+#user-id a:hover {
   text-decoration: underline;
 }
 
@@ -583,6 +606,18 @@ tr:hover td {
 
 #user-down:hover {
   cursor: pointer;
+}
+
+#user-menu {
+	position: absolute;
+	background: #222;
+	width: 75px;
+	padding-left: 5px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	top: 20px;
 }
 
 /* old styles */

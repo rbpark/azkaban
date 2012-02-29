@@ -29,9 +29,17 @@ public abstract class LoginAbstractAzkabanServlet extends
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-
+		
 		// Set session id
 	    Session session = getSessionFromRequest(req);
+		if (hasParam(req, "logout")) {
+			resp.sendRedirect(req.getContextPath());
+			if (session != null) {
+				getApplication().getSessionCache().removeSession(session.getId());
+			}
+			return;
+		}
+	    
 		if (session != null) {
 		    logger.info("Found session " + session.getUser());
 			handleGet(req, resp, session);
@@ -96,8 +104,8 @@ public abstract class LoginAbstractAzkabanServlet extends
 					}
 					else {
 						// Validate
-						Session session = new Session(user);
 						String randomUID = UUID.randomUUID().toString();
+						Session session = new Session(randomUID, user);
 						resp.addCookie(new Cookie(SESSION_ID_NAME, randomUID));
 						getApplication().getSessionCache().addSession(randomUID, session);
 						handleGet(req, resp, session);

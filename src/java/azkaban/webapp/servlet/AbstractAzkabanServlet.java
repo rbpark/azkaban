@@ -73,7 +73,7 @@ public class AbstractAzkabanServlet extends HttpServlet {
      * @return
      */
     public boolean hasParam(HttpServletRequest request, String param) {
-        return request.getParameter(param) != null && !request.getParameter(param).isEmpty();
+        return request.getParameter(param) != null;
     }
 
     /**

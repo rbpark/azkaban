@@ -1,3 +1,6 @@
+  <title>#appname()</title>
+  <link rel="stylesheet" type="text/css" href="${context}/static/css/azkaban.css"> 
+  <link rel="shortcut icon" href="${context}/static/favicon.ico" />
   <style type="text/css">
 	.enviro-name {
 		color: ${azkaban_color};
