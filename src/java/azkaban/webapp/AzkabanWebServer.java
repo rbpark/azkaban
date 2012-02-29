@@ -20,11 +20,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.joda.time.DateTimeZone;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
@@ -53,6 +55,7 @@ public class AzkabanWebServer {
     public static final String DEFAULT_CONF_PATH = "conf";
     public static final String AZKABAN_PROPERTIES_FILE = "azkaban.properties";
     
+    private static final String DEFAULT_TIMEZONE_ID = "default.timezone.id";
     private static final Logger logger = Logger.getLogger(AzkabanWebServer.class);
     private static final int DEFAULT_PORT_NUMBER = 8081;
     private static final int DEFAULT_THREAD_NUMBER = 10;
@@ -81,6 +84,13 @@ public class AzkabanWebServer {
         velocityEngine = configureVelocityEngine(props.getBoolean(VELOCITY_DEV_MODE_PARAM, false));
         sessionCache = new SessionCache(props);
         userManager = loadUserManager(props);
+        
+        // Setup time zone
+        if (props.containsKey(DEFAULT_TIMEZONE_ID)) {
+        	String timezone = props.getString(DEFAULT_TIMEZONE_ID);
+        	TimeZone.setDefault(TimeZone.getTimeZone(timezone));
+        	DateTimeZone.setDefault(DateTimeZone.forID(timezone));
+        }
         
        // jndiHelper.getUser("rpark", "");
         MySQLConnection connection = new MySQLConnection(props);

@@ -25,6 +25,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import azkaban.utils.Props;
 import azkaban.webapp.AzkabanWebServer;
 import azkaban.webapp.session.Session;
@@ -33,6 +37,8 @@ import azkaban.webapp.session.Session;
  * Base Servlet for pages
  */
 public class AbstractAzkabanServlet extends HttpServlet {
+    private static final DateTimeFormatter ZONE_FORMATTER = DateTimeFormat.forPattern("z");
+
     private static final long serialVersionUID = -1;
     public static final String DEFAULT_LOG_URL_PREFIX = "predefined_log_url_prefix";
     public static final String LOG_URL_PREFIX = "log_url_prefix";
@@ -163,7 +169,10 @@ public class AbstractAzkabanServlet extends HttpServlet {
         page.add("azkaban_name", name);
         page.add("azkaban_label", label);
         page.add("azkaban_color", color);
+        page.add("timezone", ZONE_FORMATTER.print(System.currentTimeMillis()));
+        page.add("currentTime",(new DateTime()).getMillis());
         page.add("user_id", session.getUser().getUserId());
+        page.add("context", req.getContextPath());
         return page;
     }
 
@@ -180,6 +189,9 @@ public class AbstractAzkabanServlet extends HttpServlet {
         page.add("azkaban_name", name);
         page.add("azkaban_label", label);
         page.add("azkaban_color", color);
+        page.add("timezone", ZONE_FORMATTER.print(System.currentTimeMillis()));
+        page.add("currentTime",(new DateTime()).getMillis());
+        page.add("context", req.getContextPath());
         return page;
     }
     

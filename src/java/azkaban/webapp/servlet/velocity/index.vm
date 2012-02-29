@@ -7,6 +7,11 @@
     <script type="text/javascript" src="${context}/static/js/underscore-1.2.1-min.js"></script>
     <script type="text/javascript" src="${context}/static/js/backbone-0.5.3-min.js"></script>
     <script type="text/javascript" src="${context}/static/js/azkaban.nav.js"></script>
+    <script type="text/javascript">
+      var contextURL = "${context}";
+      var currentTime = ${currentTime};
+      var timezone = "${timezone}";
+    </script>
   </head>
   <body>
     #set($current_page="all")
@@ -27,6 +32,7 @@
       </div>
     <div class="content">
   </body>
+
 </html>
 
 

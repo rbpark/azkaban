@@ -13,18 +13,27 @@
     </div>
     
     <div id="login" class="shadow-box">
-    	<div class="box-title">Login</div>
+    	<div class="shadow-box-header">
+    		<div class="box-title">Login</div>
+ 		</div>
+    	<br>
     	#if($errorMsg)
     		<div class="box-error-message">$errorMsg</div>
     	#end
     	<form class="login-form" method="post">
-	    	<p>Username</p>
-	    	<input type="text" name="username" class="login-textbox" ></input>
-	    	<p>Password</p>
-	    	<input type="password" name="password" class="login-textbox"></input>
-	    	<br>
-	    	<input type="hidden" name="action" value="login"></input>
-	    	<input type="submit" value="login" class="login-submit"/>
+    		<div id="login-password">
+		    	<p class="login-label">Username</p>
+		    	<input type="text" name="username" class="login-textbox" ></input>
+	
+				<br/>
+		    	<p class="login-label">Password</p>
+		    	<input type="password" name="password" class="login-textbox"></input>
+			</div>
+
+	    	<div class="shadow-box-footer">
+	    	  <input type="hidden" name="action" value="login"></input>
+	    	  <input class="btn2 button1" type="submit" value="Login" class="login-submit"/>
+	    	</div>
     	</form>
     </div>
   </body>
