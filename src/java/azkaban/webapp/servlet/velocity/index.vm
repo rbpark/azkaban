@@ -6,6 +6,7 @@
     <script type="text/javascript" src="${context}/static/js/namespace.js"></script>
     <script type="text/javascript" src="${context}/static/js/underscore-1.2.1-min.js"></script>
     <script type="text/javascript" src="${context}/static/js/backbone-0.5.3-min.js"></script>
+    <script type="text/javascript" src="${context}/static/js/jquery.simplemodal.js"></script>
     <script type="text/javascript" src="${context}/static/js/azkaban.nav.js"></script>
     <script type="text/javascript" src="${context}/static/js/azkaban.job.view.js"></script>
     <script type="text/javascript">
