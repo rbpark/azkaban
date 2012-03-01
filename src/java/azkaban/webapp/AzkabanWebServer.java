@@ -92,8 +92,7 @@ public class AzkabanWebServer {
         	DateTimeZone.setDefault(DateTimeZone.forID(timezone));
         }
         
-       // jndiHelper.getUser("rpark", "");
-        MySQLConnection connection = new MySQLConnection(props);
+        //MySQLConnection connection = new MySQLConnection(props);
     }
     
     private UserManager loadUserManager(Props props) {

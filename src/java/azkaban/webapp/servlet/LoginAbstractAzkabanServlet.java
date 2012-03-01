@@ -52,13 +52,14 @@ public abstract class LoginAbstractAzkabanServlet extends
 	private Session getSessionFromRequest(HttpServletRequest req) {
 		Cookie[] cookies = req.getCookies();
 		String sessionId = null;
-		for(Cookie cookie : cookies) {
-			if (SESSION_ID_NAME.equals(cookie.getName())) {
-				sessionId = cookie.getValue();
-				logger.info("Session id " + sessionId);
+		if (cookies != null) {
+			for(Cookie cookie : cookies) {
+				if (SESSION_ID_NAME.equals(cookie.getName())) {
+					sessionId = cookie.getValue();
+					logger.info("Session id " + sessionId);
+				}
 			}
 		}
-		
 		if (sessionId == null) {
 			return null;
 		}
