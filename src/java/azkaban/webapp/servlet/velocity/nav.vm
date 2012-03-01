@@ -12,8 +12,7 @@
     
     <div id="user-id">
     	<a>${user_id}<div id="user-down"></div></a>    
-    
-    	<div id="user-menu">
+        <div id="user-menu">
     		<ul><li><a id="logout" href="$!context?logout">logout</a></li></ul>
     	</div>
     </div>

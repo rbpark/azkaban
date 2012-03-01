@@ -8,8 +8,7 @@ azkaban.NavView = Backbone.View.extend({
 	initialize : function(settings) {
 		$("#user-menu").hide();
 	},
-	handleUserMenu : function() {
-		console.log("Click!");
+	handleUserMenu : function(evt) {
 		if ($("#user-menu").is(":visible")) {
 			$("#user-menu").slideUp('fast');
 		}

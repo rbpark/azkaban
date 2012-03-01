@@ -7,6 +7,7 @@
     <script type="text/javascript" src="${context}/static/js/underscore-1.2.1-min.js"></script>
     <script type="text/javascript" src="${context}/static/js/backbone-0.5.3-min.js"></script>
     <script type="text/javascript" src="${context}/static/js/azkaban.nav.js"></script>
+    <script type="text/javascript" src="${context}/static/js/azkaban.job.view.js"></script>
     <script type="text/javascript">
       var contextURL = "${context}";
       var currentTime = ${currentTime};
@@ -20,19 +21,43 @@
       <div id="all-jobs-content">
         <div class="section-hd">
           <h2>All Jobs</h2>
-      
+
           <form method="get">
             <input type="hidden" name="action" value="search">
             <input type="submit" value="Search" class="search-btn">
             <input type="text" placeholder="by job name or wildcard" value="" class="search-input" name="job">
           </form>
 
-          <a class="btn1 upload" href="#">Upload Job</a>
+          <a id="upload-btn" class="btn1 upload" href="#">Upload Job</a>
         </div><!-- end .section-hd -->
       </div>
     <div class="content">
   </body>
 
+<!-- modal content -->
+  <div id="upload-job" class="modal">
+    <h3>Upload Job</h3>
+      <div class="message">
+
+        <form enctype="multipart/form-data" method="post" action="$!context/api/jobs">
+          <fieldset>
+            <dl>
+              <dt><label for="path">Project Name</label></dt>
+              <dd><input id="path" name="path" type="text" size="20" 
+                      title="The destination path that the zip file will be uncompressed to on Azkaban. If the path already exists in Azkaban, it will be overwritten."/>
+              </dd>
+              <dt>Job Package Zip</dt>
+              <dd><input id="file" name="file" class="file" type="file" onChange="changeFile()" /></dd>
+            </dl>
+          </fieldset>
+        </form>
+
+      </div>
+      <div class="actions">
+        <a class="yes btn2" href="#">Deploy</a>
+        <a class="no simplemodal-close btn3" href="#">Cancel</a>
+      </div>
+    </div>
 </html>
 
 

@@ -9,6 +9,6 @@
 		border-top-color: ${azkaban_color};
 	}
 	.nav .selected a {
-	  border-bottom-color: ${azkaban_color};
+	    border-bottom-color: ${azkaban_color};
 	}
   </style>
