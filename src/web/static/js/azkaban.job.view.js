@@ -36,7 +36,7 @@ azkaban.JobView= Backbone.View.extend({
 var uploadView;
 azkaban.UploadJobView= Backbone.View.extend({
 	events : {
-		"onchange #file": "handleFileChange"
+		"change #file": "handleFileChange"
 	},
 	initialize : function(settings) {
 

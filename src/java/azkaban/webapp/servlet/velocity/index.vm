@@ -48,7 +48,7 @@
                       title="The destination path that the zip file will be uncompressed to on Azkaban. If the path already exists in Azkaban, it will be overwritten."/>
               </dd>
               <dt>Job Package Zip</dt>
-              <dd><input id="file" name="file" class="file" type="file" onChange="changeFile()" /></dd>
+              <dd><input id="file" name="file" class="file" type="file" /></dd>
             </dl>
           </fieldset>
         </form>
