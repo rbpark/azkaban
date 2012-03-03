@@ -1,31 +1,23 @@
 package azkaban.database;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.mysql.jdbc.PreparedStatement;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import azkaban.utils.Props;
 
 public class MySQLConnection {
-    private static final String USER_TABLE_NAME = "user";
-
     private static final Logger logger = Logger
             .getLogger(MySQLConnection.class);
+    
+    private static MySQLConnection connection;
+ 
     private final String host;
     private final String dbName;
     private final String user;
@@ -34,7 +26,17 @@ public class MySQLConnection {
 
     private MysqlConnectionPoolDataSource dataSource;
 
-    public MySQLConnection(Props props) {
+    public synchronized static void init(Props props) {
+        if (connection != null) {
+            connection = new MySQLConnection(props);
+        }
+    }
+
+    public synchronized static MySQLConnection getInstance() {
+        return connection;
+    }
+
+    private MySQLConnection(Props props) {
         host = props.getString("mysql.host", "");
         dbName = props.getString("mysql.name", "");
         port = props.getInt("mysql.port", 3306);
@@ -49,16 +51,10 @@ public class MySQLConnection {
         dataSource.setPassword(password);
 
         logger.info("Connecting to " + host + ":" + port + " db:" + dbName + " u:" + user + " p:" + password);
-        
-        checkTables();
-    }
-
-    private void checkTables() {
-       // Set<String> tables = findTables(); 
     }
 
     @SuppressWarnings("unused")
-    private MySQLQuery createQuery(String sql) {
+    public MySQLQuery createQuery(String sql) {
         Connection conn = null;
         PreparedStatement statement = null;
         MySQLQuery query = null;
@@ -112,6 +108,4 @@ public class MySQLConnection {
         tableQuery.close();
         return tables;
     }
-    
-
 }

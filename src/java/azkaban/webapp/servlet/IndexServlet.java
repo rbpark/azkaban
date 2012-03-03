@@ -44,6 +44,15 @@ public class IndexServlet extends LoginAbstractAzkabanServlet {
     @Override
     protected void handlePost(HttpServletRequest req, HttpServletResponse resp, Session session)
             throws ServletException, IOException {
-        resp.sendRedirect(req.getContextPath());
+        if(hasParam(req, "action")) {
+            String action = getParam(req, "action");
+            if (action != null && "verifyUpload".equals(action)) {
+                // Checking upload
+                
+            }
+        }
+        else {
+            resp.sendRedirect(req.getContextPath());
+        }
     }
 }
