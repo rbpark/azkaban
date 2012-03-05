@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -22,10 +23,10 @@ import azkaban.utils.Utils;
 import azkaban.webapp.AzkabanWebServer;
 import azkaban.webapp.session.Session;
 
-public class DeployJobServlet extends LoginAbstractAzkabanServlet {
+public class JobManagerServlet extends LoginAbstractAzkabanServlet {
     private static final long serialVersionUID = 1;
     private static final Logger logger = Logger
-            .getLogger(DeployJobServlet.class);
+            .getLogger(JobManagerServlet.class);
     private static final int DEFAULT_UPLOAD_DISK_SPOOL_SIZE = 20 * 1024 * 1024;
 
     private MultipartParser multipartParser;
@@ -43,15 +44,18 @@ public class DeployJobServlet extends LoginAbstractAzkabanServlet {
     @Override
     protected void handleGet(HttpServletRequest req, HttpServletResponse resp,
             Session session) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        //
         resp.getWriter().write("No get with servlet deploy");
     }
 
     @Override
     protected void handlePost(HttpServletRequest req, HttpServletResponse resp,
             Session session) throws ServletException, IOException {
-        // TODO Auto-generated method stub
+        String action = getParam(req, "action");
+        String name = getParam(req, "project_name");
+
+        if (action.equals("verify")) {
+            responseMessage(resp, null, false);
+        }
 
     }
 
@@ -84,12 +88,22 @@ public class DeployJobServlet extends LoginAbstractAzkabanServlet {
     }
 
     private void responseMessage(HttpServletResponse response, String message, boolean error) throws IOException {
+        response.setContentType(JSON_MIME_TYPE);
+
+        HashMap<String, String> respObj = new HashMap<String,String>();
+        
         if (error) {
-            response.getWriter().write("{'error':'" + message + "'}");
+            respObj.put("status", "error");
         }
         else {
-            response.getWriter().write("{'success':'" + message + "'}");
+            respObj.put("status", "success");
         }
+        
+        if (message != null) {
+            respObj.put("message", message);
+        }
+
+        writeJSON(response, respObj);
     }
 
     private File extractFile(FileItem item) throws IOException, ServletException {

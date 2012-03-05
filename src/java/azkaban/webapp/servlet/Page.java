@@ -28,13 +28,14 @@ import azkaban.utils.Utils;
  * A page to display
  */
 public class Page {
-
+    private static final String DEFAULT_MIME_TYPE = "text/html";
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final VelocityEngine engine;
     private final VelocityContext context;
     private final String template;
-
+    private String mimeType = DEFAULT_MIME_TYPE;
+    
     /**
      * Creates a page and sets up the velocity engine to render
      * 
@@ -62,6 +63,7 @@ public class Page {
      */
     public void render() {
         try {
+            response.setContentType(mimeType);
             engine.mergeTemplate(template, "UTF-8", context, response.getWriter());
         } catch(Exception e) {
             throw new PageRenderException(e);
@@ -73,5 +75,9 @@ public class Page {
      */
     public void add(String name, Object value) {
         context.put(name, value);
+    }
+    
+    public void setMimeType(String type) {
+        mimeType = type;
     }
 }

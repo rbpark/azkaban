@@ -16,6 +16,7 @@
 
 package azkaban.webapp.servlet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -42,7 +46,10 @@ public class AbstractAzkabanServlet extends HttpServlet {
     private static final long serialVersionUID = -1;
     public static final String DEFAULT_LOG_URL_PREFIX = "predefined_log_url_prefix";
     public static final String LOG_URL_PREFIX = "log_url_prefix";
-
+    public static final String HTML_TYPE = "text/html";
+    public static final String XML_MIME_TYPE = "application/xhtml+xml";
+    public static final String JSON_MIME_TYPE = "application/json";
+    
     private AzkabanWebServer application;
     private String name;
     private String label;
@@ -193,6 +200,19 @@ public class AbstractAzkabanServlet extends HttpServlet {
         page.add("currentTime",(new DateTime()).getMillis());
         page.add("context", req.getContextPath());
         return page;
+    }
+
+    /**
+     * Writes json out to the stream.
+     * 
+     * @param resp
+     * @param obj
+     * @throws IOException
+     */
+    protected void writeJSON(HttpServletResponse resp, Object obj) throws IOException {
+        resp.setContentType(JSON_MIME_TYPE);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(resp.getOutputStream(), obj);
     }
     
     /**
