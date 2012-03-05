@@ -16,6 +16,10 @@
 package azkaban.jobs.builtin;
 
 import azkaban.common.utils.Props;
+import azkaban.util.SecurityUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.SecurityUtil;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
@@ -28,7 +32,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.PrivilegedExceptionAction;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -97,9 +103,16 @@ public class JavaJobRunnerMain {
 
             _cancelMethod = prop.getProperty(CANCEL_METHOD_PARAM, DEFAULT_CANCEL_METHOD);
 
-            String runMethod = prop.getProperty(RUN_METHOD_PARAM, DEFAULT_RUN_METHOD);
+            final String runMethod = prop.getProperty(RUN_METHOD_PARAM, DEFAULT_RUN_METHOD);
             _logger.info("Invoking method " + runMethod);
-            _javaObject.getClass().getMethod(runMethod, new Class<?>[] {}).invoke(_javaObject);
+
+            if(SecurityUtils.shouldProxy(prop)) {
+              _logger.info("Proxying enabled.");
+              runMethodAsProxyUser(prop, _javaObject, runMethod);
+            } else {
+              _logger.info("Proxy check failed, not proxying run.");
+              runMethod(_javaObject, runMethod);
+            }
             _isFinished = true;
 
             // Get the generated properties and store them to disk, to be read by ProcessJob.
@@ -123,7 +136,23 @@ public class JavaJobRunnerMain {
         }
     }
 
-    private void outputGeneratedProperties(Props outputProperties)
+  private void runMethodAsProxyUser(Properties prop, final Object obj, final String runMethod) throws IOException, InterruptedException {
+    SecurityUtils.getProxiedUser(prop, _logger).doAs(new PrivilegedExceptionAction<Void>() {
+      @Override
+      public Void run() throws Exception {
+        runMethod(obj, runMethod);
+        return null;
+      }
+    });
+  }
+
+
+
+  private void runMethod(Object obj, String runMethod) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    obj.getClass().getMethod(runMethod, new Class<?>[] {}).invoke(obj);
+  }
+
+  private void outputGeneratedProperties(Props outputProperties)
     {
         _logger.info("Outputting generated properties to " + ProcessJob.JOB_OUTPUT_PROP_FILE);
         if (outputProperties == null) {
