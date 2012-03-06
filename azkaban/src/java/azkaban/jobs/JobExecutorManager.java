@@ -81,15 +81,29 @@ public class JobExecutorManager {
      * @param name
      * @throws Exception
      */
-    public void cancel(String name) throws Exception {
-    	ExecutingJobAndInstance instance = executing.get(name);
+    public void cancel(String id) throws Exception {
+    	ExecutingJobAndInstance instance = executing.get(id);
         if(instance == null) {
-            throw new IllegalArgumentException("'" + name + "' is not currently running.");
+            logger.error("Could not find job with id " + id);
+            for (Map.Entry<String, ExecutingJobAndInstance> entry : executing.entrySet()) {
+                ExecutingJobAndInstance ins = entry.getValue();
+                if ( id.equals(ins.getExecutableFlow().getId())) {
+                    logger.error("Manually found job with " + id);
+                    instance.getExecutableFlow().cancel();
+                    executing.remove(id);
+                    return;
+                }
+            }
+            throw new IllegalArgumentException("'" + id + "' is not currently running.");
         }
-        
-        instance.getExecutableFlow().cancel();
+        else {
+            logger.error("Found job with id " + id);
+            instance.getExecutableFlow().cancel();
+            executing.remove(id);
+        }
     }
-
+)
+    
     public void cancelAllJobsWithName(String name) throws Exception {
     	for (Map.Entry<String, ExecutingJobAndInstance> entry: executing.entrySet()) {
     		if (entry.getValue().getExecutableFlow().getName().equals(name)) {
@@ -297,6 +311,9 @@ public class JobExecutorManager {
             } catch(UnknownHostException uhe) {
                 logger.error(uhe);
             }
+            catch (Exception e) {
+                logger.error(e);
+            }
         }
     }
 
@@ -323,6 +340,9 @@ public class JobExecutorManager {
                                                      + ".");
             } catch(UnknownHostException uhe) {
                 logger.error(uhe);
+            }
+            catch (Exception e) {
+                logger.error(e);
             }
         }
     }
