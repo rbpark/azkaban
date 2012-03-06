@@ -88,9 +88,9 @@ public class JobExecutorManager {
             for (Map.Entry<String, ExecutingJobAndInstance> entry : executing.entrySet()) {
                 ExecutingJobAndInstance ins = entry.getValue();
                 if ( id.equals(ins.getExecutableFlow().getId())) {
-                    logger.error("Manually found job with " + id);
-                    instance.getExecutableFlow().cancel();
-                    executing.remove(id);
+                    logger.error("Manually found job with " + id + " but under entry " + entry.getKey());
+                    ins.getExecutableFlow().cancel();
+                    executing.remove(entry.getKey());
                     return;
                 }
             }
