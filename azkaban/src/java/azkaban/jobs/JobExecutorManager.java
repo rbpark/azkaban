@@ -102,7 +102,6 @@ public class JobExecutorManager {
             executing.remove(id);
         }
     }
-)
     
     public void cancelAllJobsWithName(String name) throws Exception {
     	for (Map.Entry<String, ExecutingJobAndInstance> entry: executing.entrySet()) {
