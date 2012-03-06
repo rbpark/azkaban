@@ -285,6 +285,8 @@ tr:hover td {
 /* confirm modal */
 .modal {
   display: none;
+  -moz-box-shadow: 5px 5px 5px #CCC;
+  -webkit-box-shadow: 5px 5px 5px #CCC;
 }
 
 .search-input {
@@ -585,7 +587,7 @@ tr:hover td {
 
 .box-error-message {
   background-color: #C00000;
-  margin: 0px auto;
+  margin: 0px 2px;
   padding: 2px 12px;
   color: white;
 }

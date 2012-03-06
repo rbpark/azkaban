@@ -38,8 +38,8 @@
 <!-- modal content -->
   <div id="upload-job" class="modal">
     <h3>Upload Job</h3>
+      <div id="errorMsg" class="box-error-message">$errorMsg</div>
       <div class="message">
-
         <form enctype="multipart/form-data" method="post" action="$!context/api/jobs">
           <fieldset>
             <dl>
@@ -55,7 +55,7 @@
 
       </div>
       <div class="actions">
-        <a class="yes btn2" href="#">Deploy</a>
+        <a class="yes btn2" id="deploy-btn" href="#">Deploy</a>
         <a class="no simplemodal-close btn3" href="#">Cancel</a>
       </div>
     </div>

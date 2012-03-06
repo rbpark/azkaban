@@ -50,63 +50,59 @@ public class JobManagerServlet extends LoginAbstractAzkabanServlet {
     @Override
     protected void handlePost(HttpServletRequest req, HttpServletResponse resp,
             Session session) throws ServletException, IOException {
+        HashMap<String, Object> respObj = new HashMap<String, Object>();
         String action = getParam(req, "action");
-        String name = getParam(req, "project_name");
+        respObj.put("action", action);
 
         if (action.equals("verify")) {
-            responseMessage(resp, null, false);
+            handleVerify(req, respObj, session);
         }
 
+        writeJSON(resp, respObj);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
+    private void handleVerify(HttpServletRequest req,
+            Map<String, Object> respObj, Session session)
+            throws ServletException {
+        String projectName = getParam(req, "project");
+        String filename = getParam(req, "filename");
+        respObj.put("project", projectName);
+        respObj.put("filename", filename);
+
+        if (!filename.toLowerCase().endsWith(".zip")) {
+            respObj.put("status", "error");
+            respObj.put("message", "File must be a zip file.");
+        } else {
+            respObj.put("status", "success");
+        }
+    }
+
+    private void handleDeploy(HttpServletRequest request,
+            Map<String, Object> respObj, Session session) throws IOException,
+            ServletException {
+
         if (!ServletFileUpload.isMultipartContent(request)) {
-            responseMessage(response, "Installation Failed: No job file found!", true);
-            throw new ServletException("No job file found!");
+            respObj.put("status", "error");
+            respObj.put("message", "No file found.");
         }
 
         Map<String, Object> params = this.multipartParser
                 .parseMultipart(request);
-
         try {
             final AzkabanWebServer app = super.getApplication();
 
             FileItem item = (FileItem) params.get("file");
             String deployPath = (String) params.get("path");
             File jobDir = extractFile(item);
-
         } catch (Exception e) {
             logger.info("Installation Failed.", e);
-            responseMessage(response, "Installation Failed: " + e.getLocalizedMessage(), true);
-
-            return;
-        }
-
-        responseMessage(response, "Installation Succeeded", false);
-    }
-
-    private void responseMessage(HttpServletResponse response, String message, boolean error) throws IOException {
-        response.setContentType(JSON_MIME_TYPE);
-
-        HashMap<String, String> respObj = new HashMap<String,String>();
-        
-        if (error) {
             respObj.put("status", "error");
+            respObj.put("message", "Installation Failed: " + e.getLocalizedMessage());
         }
-        else {
-            respObj.put("status", "success");
-        }
-        
-        if (message != null) {
-            respObj.put("message", message);
-        }
-
-        writeJSON(response, respObj);
     }
 
-    private File extractFile(FileItem item) throws IOException, ServletException {
+    private File extractFile(FileItem item) throws IOException,
+            ServletException {
         final String contentType = item.getContentType();
         if (contentType.startsWith("application/zip")) {
             return unzipFile(item);
@@ -116,18 +112,19 @@ public class JobManagerServlet extends LoginAbstractAzkabanServlet {
             return untarFile(item);
         }
 
-        throw new ServletException(String.format("Unsupported file type[%s].", contentType));
+        throw new ServletException(String.format("Unsupported file type[%s].",
+                contentType));
     }
-    
+
     private File unzipFile(FileItem item) throws ServletException, IOException {
         File temp = File.createTempFile("job-temp", ".zip");
         temp.deleteOnExit();
-        
+
         OutputStream out = new BufferedOutputStream(new FileOutputStream(temp));
-        
-        IOUtils.copy(item.getInputStream(), out);  
+
+        IOUtils.copy(item.getInputStream(), out);
         out.close();
-        
+
         ZipFile zipfile = new ZipFile(temp);
         File unzipped = Utils.createTempDir(tempDir);
         Utils.unzip(zipfile, unzipped);
@@ -135,7 +132,7 @@ public class JobManagerServlet extends LoginAbstractAzkabanServlet {
         temp.delete();
         return unzipped;
     }
-    
+
     private File untarFile(FileItem item) throws IOException, ServletException {
         File extractionPath = Utils.createTempDir(tempDir);
 

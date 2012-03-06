@@ -14,7 +14,7 @@
  * the License.
  */
 
-package azkaban.web;
+package azkaban.webapp.servlet;
 
 import java.io.IOException;
 import java.util.HashMap;

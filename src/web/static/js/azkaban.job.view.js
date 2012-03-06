@@ -20,12 +20,12 @@ azkaban.JobView= Backbone.View.extend({
 	        },
 	        onShow: function (dialog) {
 	          var modal = this;
-
+            $("#errorMsg").hide();
 	          // if the user clicks "yes"
-	          $('.yes', dialog.data[0]).click(function () {
+	          //$('.yes', dialog.data[0]).click(function () {
 	            // close the dialog
-	            modal.close(); // or $.modal.close();
-	          });
+	            //modal.close(); // or $.modal.close();
+	          //});
 	        }
 	      });
 	},
@@ -36,13 +36,50 @@ azkaban.JobView= Backbone.View.extend({
 var uploadView;
 azkaban.UploadJobView= Backbone.View.extend({
 	events : {
-		"change #file": "handleFileChange"
+		"change #file": "handleFileChange",
+		"click #deploy-btn": "handleUploadJob"
 	},
 	initialize : function(settings) {
-
+    $("#errorMsg").hide();
 	},
 	handleUploadJob : function(evt) {
-		
+	  // First make sure we can upload
+
+	  var projectName = $('#path').val();
+	  var dir = document.getElementById('file').value;
+	  if (projectName == "") {
+	    $("#errorMsg").text("ERROR: Empty Project Name.");
+	    $("#errorMsg").slideDown("fast");
+	  }
+	  else if (dir == "") {
+	    $("#errorMsg").text("ERROR: No zip file selected.");
+      $("#errorMsg").slideDown("fast");
+	  }
+	  else {
+	     $("#errorMsg").slideUp("fast");
+      var lastIndexOfForwardSlash = dir.lastIndexOf('\\');
+      var lastIndexOfBackwardSlash = dir.lastIndexOf('/');
+      
+      var startIndex = Math.max(lastIndexOfForwardSlash, lastIndexOfBackwardSlash);
+      startIndex += 1;
+      var filename = dir.substring(startIndex);
+  		$.ajax({
+  		  type: 'POST',
+  		  url: contextURL + "/manager",
+  		  async: false,
+  		  cache: false,
+  		  data: {action: "verify", project: projectName, filename: filename },
+  		  success: function(data) {
+  		    if (data.status == "error") {
+  		       $("#errorMsg").text("ERROR: " + data.message);
+  		       $("#errorMsg").slideDown("fast");
+  		    }
+  		    else {
+  		       
+  		    }
+  		  }
+  		});
+		}
 	},
 	handleFileChange : function(evt) {
 		var path = $('#path');
