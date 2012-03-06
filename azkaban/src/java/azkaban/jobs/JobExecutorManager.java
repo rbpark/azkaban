@@ -3,6 +3,7 @@ package azkaban.jobs;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,6 +74,18 @@ public class JobExecutorManager {
         this.completed = Multimaps.synchronizedMultimap(typedMultiMap);
     	this.executing = new ConcurrentHashMap<String, ExecutingJobAndInstance>();
     	this.executor = new ThreadPoolExecutor(0, maxThreads, 10, TimeUnit.SECONDS, new LinkedBlockingQueue(), new ExecutorThreadFactory());
+    }
+    
+    public List<String> getExecutingListById() {
+        return new ArrayList<String>(executing.keySet());
+    }
+    
+    public boolean doesJobExistInExecutingList(String id) {
+        return executing.containsKey(id);
+    }
+    
+    public void removeJobFromExecutingList(String id) {
+        executing.remove(id);
     }
     
     /**

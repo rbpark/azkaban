@@ -16,7 +16,9 @@
 
 package azkaban.jobcontrol.impl.jobs.locks;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class NamedPermitManager {
@@ -24,6 +26,10 @@ public class NamedPermitManager {
 	
 	public NamedPermitManager() {
 		_namedPermitManager = new Hashtable<String, Permit>();
+	}
+	
+	public List<String> getPermitNames() {
+	    return new ArrayList<String>(_namedPermitManager.keySet());
 	}
 	
 	public void createNamedPermit( String name, int totalPermits ) {
@@ -49,4 +55,14 @@ public class NamedPermitManager {
 		}
 	}
 	
+	public boolean releasePermitByName(String name, int num) {
+	    Permit permit = _namedPermitManager.get(name);
+	    if (permit == null) {
+	        return false;
+	    }
+	    
+	    permit._semaphore.release(num);
+	    
+	    return true;
+	}
 }

@@ -35,6 +35,7 @@ import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.joda.time.DateTimeZone;
 
+import azkaban.app.jmx.JmxExecutorManager;
 import azkaban.app.jmx.JobScheduler;
 import azkaban.app.jmx.RefreshJobs;
 import azkaban.common.jobs.Job;
@@ -102,6 +103,10 @@ public class AzkabanApplication
     private MBeanServer mbeanServer;
     private ObjectName jobRefresherName;
     private ObjectName jobSchedulerName;
+    private ObjectName jobExecutorName;
+    
+    private NamedPermitManager _permitManager;
+    private ReadWriteLockManager _readWriteLockManager;
     
     public AzkabanApplication(final List<File> jobDirs, final File logDir, final File tempDir, final boolean enableDevMode) throws IOException {
         this._jobDirs = Utils.nonNull(jobDirs);
@@ -137,10 +142,11 @@ public class AzkabanApplication
         	TimeZone.setDefault(TimeZone.getTimeZone(defaultTimezoneID));
         }
         
-        NamedPermitManager permitManager = getNamedPermitManager(defaultProps);
+        _permitManager = getNamedPermitManager(defaultProps);
+        _readWriteLockManager = new ReadWriteLockManager();
         JobWrappingFactory factory = new JobWrappingFactory(
-                permitManager,
-                new ReadWriteLockManager(),
+                _permitManager,
+                _readWriteLockManager,
                 _logsDir.getAbsolutePath(),
                 "java",
                 new ImmutableMap.Builder<String, Class<? extends Job>>()
@@ -263,11 +269,15 @@ public class AzkabanApplication
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
         try {
             jobRefresherName = new ObjectName("azkaban.app.jmx.RefreshJobs:name=jobRefresher");
-            jobSchedulerName = new ObjectName("azkaban.app.jmx.jobScheduler:name=jobScheduler");
+            jobSchedulerName = new ObjectName("azkaban.app.jmx.JobScheduler:name=jobScheduler");
+            jobExecutorName = new ObjectName("azkaban.app.jmx.JmxExecutorManager:name=jobExecutor");
+            
             mbeanServer.registerMBean(new RefreshJobs(this), jobRefresherName);
             logger.info("Bean " + jobRefresherName.getCanonicalName() + " registered.");
             mbeanServer.registerMBean(new JobScheduler(_schedulerManager, _jobManager), jobSchedulerName);
             logger.info("Bean " + jobSchedulerName.getCanonicalName() + " registered.");
+            mbeanServer.registerMBean(new JmxExecutorManager(_jobExecutorManager, _permitManager, _readWriteLockManager), jobExecutorName);
+            logger.info("Bean " + jobExecutorName.getCanonicalName() + " registered.");
         }
         catch(Exception e) {
             logger.error("Failed to configure MBeanServer", e);
