@@ -50,55 +50,52 @@ public class JobManagerServlet extends LoginAbstractAzkabanServlet {
     @Override
     protected void handlePost(HttpServletRequest req, HttpServletResponse resp,
             Session session) throws ServletException, IOException {
-        HashMap<String, Object> respObj = new HashMap<String, Object>();
-        String action = getParam(req, "action");
-        respObj.put("action", action);
 
-        if (action.equals("verify")) {
-            handleVerify(req, respObj, session);
+        // Handle the case of uploads
+        if (ServletFileUpload.isMultipartContent(req)) {
+            Map<String, Object> params = this.multipartParser.parseMultipart(req);
+            String action = (String) params.get("action");
+            if (action == null) {
+                throw new RuntimeException("Param 'action' not set.");
+            }
+
+            if (action.equals("deploy")) {
+                handleDeploy(req, params, resp, session);
+            }
         }
+        else {
+            HashMap<String, Object> respObj = new HashMap<String, Object>();
+            String action = getParam(req, "action");
+            respObj.put("action", action);
 
-        writeJSON(resp, respObj);
-    }
-
-    private void handleVerify(HttpServletRequest req,
-            Map<String, Object> respObj, Session session)
-            throws ServletException {
-        String projectName = getParam(req, "project");
-        String filename = getParam(req, "filename");
-        respObj.put("project", projectName);
-        respObj.put("filename", filename);
-
-        if (!filename.toLowerCase().endsWith(".zip")) {
-            respObj.put("status", "error");
-            respObj.put("message", "File must be a zip file.");
-        } else {
-            respObj.put("status", "success");
+            writeJSON(resp, respObj);
         }
     }
 
-    private void handleDeploy(HttpServletRequest request,
-            Map<String, Object> respObj, Session session) throws IOException,
+
+    private void handleDeploy(HttpServletRequest req, Map<String, Object> params, 
+            HttpServletResponse resp, Session session) throws IOException,
             ServletException {
 
-        if (!ServletFileUpload.isMultipartContent(request)) {
-            respObj.put("status", "error");
-            respObj.put("message", "No file found.");
-        }
-
-        Map<String, Object> params = this.multipartParser
-                .parseMultipart(request);
+        String projectName = (String)params.get("project");
+        String overwriteStr = (String)params.get("overwrite");
+        String redirect = (String)params.get("redirect");
+        boolean overwrite = overwriteStr == null ? false : true;
+        
+        logger.info("Deploying " + projectName + " with overwrite " + overwrite + ", redirect " + redirect);
+        
         try {
             final AzkabanWebServer app = super.getApplication();
 
             FileItem item = (FileItem) params.get("file");
-            String deployPath = (String) params.get("path");
             File jobDir = extractFile(item);
+            setSuccessMessageInCookie(resp, "Project " + projectName + " has been deployed.");
         } catch (Exception e) {
             logger.info("Installation Failed.", e);
-            respObj.put("status", "error");
-            respObj.put("message", "Installation Failed: " + e.getLocalizedMessage());
+            setErrorMessageInCookie(resp, "Installation Failed: " + e.getLocalizedMessage());
         }
+
+        resp.sendRedirect(redirect);
     }
 
     private File extractFile(FileItem item) throws IOException,

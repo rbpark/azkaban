@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,7 +43,9 @@ import azkaban.webapp.session.Session;
  */
 public class AbstractAzkabanServlet extends HttpServlet {
     private static final DateTimeFormatter ZONE_FORMATTER = DateTimeFormat.forPattern("z");
-
+    private static final String AZKABAN_SUCCESS_MESSAGE = "azkaban.success.message";
+    private static final String AZKABAN_FAILURE_MESSAGE = "azkaban.failure.message";
+    
     private static final long serialVersionUID = -1;
     public static final String DEFAULT_LOG_URL_PREFIX = "predefined_log_url_prefix";
     public static final String LOG_URL_PREFIX = "log_url_prefix";
@@ -144,23 +147,43 @@ public class AbstractAzkabanServlet extends HttpServlet {
         request.getSession(true).setAttribute(key, l);
     }
 
-    /**
-     * Adds an error message to the request
-     * @param request
-     * @param message
-     */
-    protected void addError(HttpServletRequest request, String message) {
-        addSessionValue(request, "errors", message);
+    protected void setErrorMessageInCookie(HttpServletResponse response, String errorMsg) {
+        Cookie cookie = new Cookie(AZKABAN_FAILURE_MESSAGE, errorMsg);
+        response.addCookie(cookie);
     }
 
-    /**
-     * Adds a message to the request
-     * 
-     * @param request
-     * @param message
-     */
-    protected void addMessage(HttpServletRequest request, String message) {
-        addSessionValue(request, "messages", message);
+    protected void setSuccessMessageInCookie(HttpServletResponse response, String message) {
+        Cookie cookie = new Cookie(AZKABAN_SUCCESS_MESSAGE, message);
+        response.addCookie(cookie);
+    }
+    
+    protected String getSuccessMessageFromCookie(HttpServletRequest request) {
+        Cookie cookie = getCookieByName(request, AZKABAN_SUCCESS_MESSAGE);
+
+        if (cookie == null) {
+            return null;
+        }    
+        return cookie.getValue();
+    }
+    
+    protected String getErrorMessageFromCookie(HttpServletRequest request) {
+        Cookie cookie = getCookieByName(request, AZKABAN_FAILURE_MESSAGE);
+        if (cookie == null) {
+            return null;
+        }
+
+        return cookie.getValue();
+    }
+    
+    protected Cookie getCookieByName(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        for(Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                return cookie;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -180,6 +203,18 @@ public class AbstractAzkabanServlet extends HttpServlet {
         page.add("currentTime",(new DateTime()).getMillis());
         page.add("user_id", session.getUser().getUserId());
         page.add("context", req.getContextPath());
+        
+        String errorMsg = getErrorMessageFromCookie(req);
+        page.add("error_message", errorMsg == null || errorMsg.isEmpty()? "null": "\"" + errorMsg + "\"");
+        setErrorMessageInCookie(resp, null);
+        System.out.println(errorMsg);
+        
+        String successMsg = getSuccessMessageFromCookie(req);
+        System.out.println(successMsg);
+        page.add("success_message", successMsg == null || successMsg.isEmpty()? "null": "\"" + successMsg + "\"");
+        setSuccessMessageInCookie(resp, null);
+
+        
         return page;
     }
 

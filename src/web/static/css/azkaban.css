@@ -194,8 +194,17 @@ tr:hover td {
   width: 90.3%;
 }
 
+#messageClose {
+  float: right;
+  margin-right: 25px;
+}
+
+#messageClose:hover {
+  cursor: pointer;
+}
+
 .messaging.success {
-  background-color: #799123;
+  background-color: #4e911e;
   display: block;
 }
 
@@ -285,8 +294,8 @@ tr:hover td {
 /* confirm modal */
 .modal {
   display: none;
-  -moz-box-shadow: 5px 5px 5px #CCC;
-  -webkit-box-shadow: 5px 5px 5px #CCC;
+  -moz-box-shadow: 5px 5px 5px #888;
+  -webkit-box-shadow: 5px 5px 5px #888;
 }
 
 .search-input {
@@ -436,6 +445,15 @@ tr:hover td {
 .modal dd {
   float: left;
   padding-bottom: 6px;
+}
+
+.modal dd input {
+  float: left;
+  padding-bottom: 6px;
+}
+
+#upload-job #overwrite {
+  width: 12px;
 }
 
 .simplemodal-wrap {

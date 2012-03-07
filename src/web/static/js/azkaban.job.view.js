@@ -6,39 +6,60 @@ azkaban.JobView= Backbone.View.extend({
     "click #upload-btn":"handleUploadJob"
   },
   initialize : function(settings) {
-
-	},
-	handleUploadJob : function(evt) {
-		console.log("click upload");
-	    $('#upload-job').modal({
-	        closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
-	        position: ["20%",],
-	        containerId: 'confirm-container',
-	        containerCss: {
-	          'height': '220px',
-	          'width': '565px'
-	        },
-	        onShow: function (dialog) {
-	          var modal = this;
+    if (settings.errorMsg) {
+      // Chrome bug in displaying placeholder text. Need to hide the box.
+      $('#searchtextbox').hide();
+      $('.messaging').addClass("error");
+      $('.messaging').removeClass("success");
+      $('.messaging').html(settings.errorMsg);
+    }
+    else if (settings.successMsg) {
+      $('#searchtextbox').hide();
+      $('.messaging').addClass("success");
+      $('.messaging').removeClass("error");
+      $('#message').html(settings.successMsg);
+    }
+    else {
+      $('#searchtextbox').show();
+      $('.messaging').removeClass("success");
+      $('.messaging').removeClass("error");
+    }
+    
+    $('#messageClose').click(function() {
+      $('#searchtextbox').show();
+      
+      $('.messaging').slideUp('fast', function() {
+        $('.messaging').removeClass("success");
+        $('.messaging').removeClass("error");
+      });
+    });
+  },
+  handleUploadJob : function(evt) {
+    console.log("click upload");
+      $('#upload-job').modal({
+          closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+          position: ["20%",],
+          containerId: 'confirm-container',
+          containerCss: {
+            'height': '220px',
+            'width': '565px'
+          },
+          onShow: function (dialog) {
+            var modal = this;
             $("#errorMsg").hide();
-	          // if the user clicks "yes"
-	          //$('.yes', dialog.data[0]).click(function () {
-	            // close the dialog
-	            //modal.close(); // or $.modal.close();
-	          //});
-	        }
-	      });
-	},
-	render: function() {
-	}
+          }
+        });
+  },
+  render: function() {
+  }
 });
 
 var uploadView;
 azkaban.UploadJobView= Backbone.View.extend({
-	events : {
-		"change #file": "handleFileChange",
-		"click #deploy-btn": "handleUploadJob"
-	},
+  events : {
+    "change #file": "handleFileChange",
+    "click #deploy-btn": "handleUploadJob"
+  },
 	initialize : function(settings) {
     $("#errorMsg").hide();
 	},
@@ -56,30 +77,8 @@ azkaban.UploadJobView= Backbone.View.extend({
       $("#errorMsg").slideDown("fast");
 	  }
 	  else {
-	     $("#errorMsg").slideUp("fast");
-      var lastIndexOfForwardSlash = dir.lastIndexOf('\\');
-      var lastIndexOfBackwardSlash = dir.lastIndexOf('/');
-      
-      var startIndex = Math.max(lastIndexOfForwardSlash, lastIndexOfBackwardSlash);
-      startIndex += 1;
-      var filename = dir.substring(startIndex);
-  		$.ajax({
-  		  type: 'POST',
-  		  url: contextURL + "/manager",
-  		  async: false,
-  		  cache: false,
-  		  data: {action: "verify", project: projectName, filename: filename },
-  		  success: function(data) {
-  		    if (data.status == "error") {
-  		       $("#errorMsg").text("ERROR: " + data.message);
-  		       $("#errorMsg").slideDown("fast");
-  		    }
-  		    else {
-  		       
-  		    }
-  		  }
-  		});
-		}
+	     $("#deployform").submit();
+  	}
 	},
 	handleFileChange : function(evt) {
 		var path = $('#path');
@@ -99,6 +98,6 @@ azkaban.UploadJobView= Backbone.View.extend({
 });
 
 $(function() {
-	jobView = new azkaban.JobView({el:$( '#all-jobs-content' )});
+	jobView = new azkaban.JobView({el:$( '#all-jobs-content'), successMsg: successMessage, errorMsg: errorMessage });
 	uploadView = new azkaban.UploadJobView({el:$('#upload-job')});
 });
