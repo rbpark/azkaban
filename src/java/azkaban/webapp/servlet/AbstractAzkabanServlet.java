@@ -207,10 +207,8 @@ public class AbstractAzkabanServlet extends HttpServlet {
         String errorMsg = getErrorMessageFromCookie(req);
         page.add("error_message", errorMsg == null || errorMsg.isEmpty()? "null": "\"" + errorMsg + "\"");
         setErrorMessageInCookie(resp, null);
-        System.out.println(errorMsg);
         
         String successMsg = getSuccessMessageFromCookie(req);
-        System.out.println(successMsg);
         page.add("success_message", successMsg == null || successMsg.isEmpty()? "null": "\"" + successMsg + "\"");
         setSuccessMessageInCookie(resp, null);
 

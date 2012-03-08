@@ -38,7 +38,7 @@ import azkaban.utils.Props;
 import azkaban.utils.Utils;
 import azkaban.webapp.servlet.AzkabanServletContextListener;
 import azkaban.webapp.servlet.IndexServlet;
-import azkaban.webapp.servlet.JobManagerServlet;
+import azkaban.webapp.servlet.ProjectManagerServlet;
 import azkaban.webapp.session.SessionCache;
 import azkaban.webapp.user.DefaultUserManager;
 import azkaban.webapp.user.UserManager;
@@ -276,7 +276,7 @@ public class AzkabanWebServer {
         root.setResourceBase(staticDir);
         root.addServlet(new ServletHolder(new DefaultServlet()), "/static/*");
         root.addServlet(new ServletHolder(new IndexServlet()), "/");
-        root.addServlet(new ServletHolder(new JobManagerServlet()), "/manager");
+        root.addServlet(new ServletHolder(new ProjectManagerServlet()), "/manager");
         root.setAttribute(
                 AzkabanServletContextListener.AZKABAN_SERVLET_CONTEXT_KEY, app);
 
