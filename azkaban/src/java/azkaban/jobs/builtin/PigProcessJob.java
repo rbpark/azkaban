@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import static azkaban.util.SecurityUtils.PROXY_KEYTAB_LOCATION;
 import static azkaban.util.SecurityUtils.PROXY_USER;
@@ -120,6 +121,9 @@ public class PigProcessJob extends JavaProcessJob {
 			classPath.add(new File(hadoopHome, "conf").getPath());
 		}
 
+		if(shouldProxy(getProps().toProperties())) {
+	        classPath.add(getSourcePathFromClass(SecurePigWrapper.class));
+		}
 		return classPath;
 	}
 
@@ -145,5 +149,25 @@ public class PigProcessJob extends JavaProcessJob {
 
 	protected List<String> getPigParamFiles() {
 		return getProps().getStringList(PIG_PARAM_FILES, null, ",");
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private static String getSourcePathFromClass(Class containedClass) {
+	    File file = new File(containedClass.getProtectionDomain().getCodeSource().getLocation().getPath());
+
+	    if (!file.isDirectory() && file.getName().endsWith(".class")) {
+	        String name = containedClass.getName();
+	        StringTokenizer tokenizer = new StringTokenizer(name, ".");
+	        while(tokenizer.hasMoreTokens()) {
+	            tokenizer.nextElement();
+	            file = file.getParentFile();
+	        }
+	            
+	        return file.getPath();  
+	    }
+	    else {
+	        return containedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+	    }
 	}
 }
