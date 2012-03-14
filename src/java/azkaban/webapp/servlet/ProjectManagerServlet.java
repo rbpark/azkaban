@@ -19,6 +19,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+import azkaban.project.ProjectManager;
 import azkaban.utils.Utils;
 import azkaban.webapp.AzkabanWebServer;
 import azkaban.webapp.session.Session;
@@ -29,6 +30,7 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
             .getLogger(ProjectManagerServlet.class);
     private static final int DEFAULT_UPLOAD_DISK_SPOOL_SIZE = 20 * 1024 * 1024;
 
+    private ProjectManager manager;
     private MultipartParser multipartParser;
     private File tempDir;
 
@@ -39,6 +41,7 @@ public class ProjectManagerServlet extends LoginAbstractAzkabanServlet {
                 DEFAULT_UPLOAD_DISK_SPOOL_SIZE);
 
         tempDir = this.getApplication().getTempDirectory();
+        manager = this.getApplication().getProjectManager();
     }
 
     @Override

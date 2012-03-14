@@ -64,4 +64,8 @@ public class Node {
 
         missingDependency.add(dependency);
     }
+
+    public boolean hasMissingDependency() {
+        return missingDependency != null && missingDependency.size() > 0;
+    }
 }

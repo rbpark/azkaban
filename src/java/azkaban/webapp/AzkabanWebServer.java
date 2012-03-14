@@ -34,6 +34,7 @@ import org.mortbay.jetty.servlet.DefaultServlet;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.thread.QueuedThreadPool;
 
+import azkaban.project.ProjectManager;
 import azkaban.utils.Props;
 import azkaban.utils.Utils;
 import azkaban.webapp.servlet.AzkabanServletContextListener;
@@ -66,6 +67,7 @@ public class AzkabanWebServer {
 
     private final VelocityEngine velocityEngine;
     private UserManager userManager;
+    private ProjectManager projectManager;
     private Props props;
     private SessionCache sessionCache;
     private File tempDir;
@@ -87,7 +89,8 @@ public class AzkabanWebServer {
                 VELOCITY_DEV_MODE_PARAM, false));
         sessionCache = new SessionCache(props);
         userManager = loadUserManager(props);
-
+        projectManager = loadProjectManager(props);
+        
         tempDir = new File(props.getString("azkaban.temp.dir", "temp"));
 
         // Setup time zone
@@ -100,6 +103,19 @@ public class AzkabanWebServer {
         // MySQLConnection connection = new MySQLConnection(props);
     }
 
+    private ProjectManager loadProjectManager(Props props) {
+        ProjectManager manager = null;
+        try {
+            manager = new ProjectManager(props);
+        }
+        catch(Exception e) {
+            logger.error(e);
+            throw new RuntimeException(e);
+        }
+        
+        return manager;
+    }
+    
     private UserManager loadUserManager(Props props) {
         Class<?> userManagerClass = props.getClass(USER_MANAGER_CLASS_PARAM,
                 null);
@@ -107,23 +123,17 @@ public class AzkabanWebServer {
         UserManager manager = null;
 
         if (userManagerClass != null
-                && userManagerClass.getConstructors().length > 0) {
-            if (userManagerClass.getConstructors().length > 0) {
-                try {
-                    manager = (UserManager) userManagerClass.getConstructors()[0]
-                            .newInstance();
-                } catch (Exception e) {
-                    logger.error("Could not instantiate UserManager "
-                            + userManagerClass.getName());
-                    throw new RuntimeException(e);
-                }
-            } else {
-                logger.error("Could not instantiate UserManager. No empty constructor for "
+            && userManagerClass.getConstructors().length > 0) {
+
+            try {
+                manager = (UserManager) userManagerClass.getConstructors()[0]
+                        .newInstance();
+            } catch (Exception e) {
+                logger.error("Could not instantiate UserManager "
                         + userManagerClass.getName());
-                throw new RuntimeException(
-                        "UserManager empty constructor doesn't exist for "
-                                + userManagerClass.getName());
+                throw new RuntimeException(e);
             }
+  
             manager.init(props);
         } else {
             manager = new DefaultUserManager();
@@ -159,6 +169,10 @@ public class AzkabanWebServer {
         return userManager;
     }
 
+    public ProjectManager getProjectManager() {
+        return projectManager;
+    }
+    
     /**
      * Creates and configures the velocity engine.
      * 

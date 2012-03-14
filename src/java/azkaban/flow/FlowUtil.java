@@ -13,18 +13,13 @@ import org.apache.log4j.Logger;
 
 import azkaban.utils.Props;
 
-public class FlowManager {
-    private static final Logger logger = Logger.getLogger(FlowManager.class);
+public class FlowUtil {
+    private static final Logger logger = Logger.getLogger(FlowUtil.class);
     private static final String PROPERTIES = ".properties";
     private static final String JOBS = ".jobs";
     private static final String DEPENDENCIES = "dependencies";
-    private Props parentProps = null;
 
-    public FlowManager(Props props) {
-
-    }
-
-    public List<String> loadAllFlowsFromDir(File dir) throws IOException {
+    public List<Flow> loadAllFlowsFromDir(File dir, Props parentProps) throws IOException {
         logger.info("Loading flows from " + dir.getPath());
         if (!dir.exists()) {
             throw new IOException("Directory " + dir.getPath() + " doesn't exist.");
@@ -34,18 +29,17 @@ public class FlowManager {
         }
 
         HashMap<String, Node> nodes = new HashMap<String, Node>();
-        ArrayList<String> errors = new ArrayList<String>();
+
         loadJobsFromDir(dir, parentProps, nodes);
         if (nodes.size() == 0) {
-            errors.add("No jobs found.");
-            return errors;
+            throw new IOException("No jobs found.");
         }
 
-        setupDependencies(nodes, errors);
+        setupDependencies(nodes);
         ArrayList<Node> headJobs = findHeadJobs(nodes);
 
         if (headJobs.size() == 0) {
-            errors.add("There are no starting dependency. Is there a cyclical dependency?");
+            throw new IOException("There are no starting dependency. Is there a cyclical dependency?");
         }
 
         ArrayList<Flow> flows = new ArrayList<Flow>();
@@ -56,11 +50,14 @@ public class FlowManager {
             flows.add(flow);
         }
  
-        return errors;
+        return flows;
     }
 
     private void createFlow(Node node, Flow flow, HashSet<String> nameStack) {
         flow.addNode(node);
+        if (node.hasMissingDependency()) {
+            flow.addErrors("Job " + node.getId() + " has missing dependency.");
+        }
         nameStack.add(node.getId());
 
         for (Edge edge: node.getInEdges()) {
@@ -78,7 +75,7 @@ public class FlowManager {
         nameStack.remove(node.getId());
     }
 
-    private void setupDependencies(HashMap<String, Node> nodes, List<String> errors) {
+    private void setupDependencies(HashMap<String, Node> nodes) {
         for(Node toNode : nodes.values()) {
             Props nodeProps = toNode.getProps();
             List<String> dependencies = nodeProps.getStringList(DEPENDENCIES);
@@ -89,7 +86,6 @@ public class FlowManager {
                 if (fromNode == null) {
                     String error = "Missing dependency: Job " + toNode.getId() + " depends on " + dependency;
                     logger.info("Error found: " + error);
-                    errors.add(error);
                     toNode.addMissingDependency(dependency);
                 }
                 else {

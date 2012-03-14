@@ -1,17 +1,14 @@
-package azkaban.database.mysql;
+package azkaban.project;
 
 import java.io.File;
 import java.util.Map;
 
-import azkaban.project.Project;
-import azkaban.project.ProjectLoader;
 import azkaban.utils.Props;
 
-public class MySQLProjectLoader implements ProjectLoader {
-    public MySQLProjectLoader(Props props) {
-        MySQLConnection.init(props);
-    }
+public class FileProjectLoader implements ProjectLoader {
 
+    public FileProjectLoader() {}
+    
     @Override
     public Map<String, Project> loadAllProjects() {
         // TODO Auto-generated method stub
@@ -30,4 +27,10 @@ public class MySQLProjectLoader implements ProjectLoader {
         return false;
     }
 
+    @Override
+    public void init(Props props) {
+        // TODO Auto-generated method stub
+        
+    }
+    
 }
