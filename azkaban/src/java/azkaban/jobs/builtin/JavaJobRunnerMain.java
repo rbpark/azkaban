@@ -16,7 +16,6 @@
 package azkaban.jobs.builtin;
 
 import azkaban.common.utils.Props;
-import azkaban.util.SecurityUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -106,13 +105,8 @@ public class JavaJobRunnerMain {
             final String runMethod = prop.getProperty(RUN_METHOD_PARAM, DEFAULT_RUN_METHOD);
             _logger.info("Invoking method " + runMethod);
 
-            if(SecurityUtils.shouldProxy(prop)) {
-              _logger.info("Proxying enabled.");
-              runMethodAsProxyUser(prop, _javaObject, runMethod);
-            } else {
               _logger.info("Proxy check failed, not proxying run.");
               runMethod(_javaObject, runMethod);
-            }
             _isFinished = true;
 
             // Get the generated properties and store them to disk, to be read by ProcessJob.
@@ -135,17 +129,6 @@ public class JavaJobRunnerMain {
             throw e;
         }
     }
-
-  private void runMethodAsProxyUser(Properties prop, final Object obj, final String runMethod) throws IOException, InterruptedException {
-    SecurityUtils.getProxiedUser(prop, _logger).doAs(new PrivilegedExceptionAction<Void>() {
-      @Override
-      public Void run() throws Exception {
-        runMethod(obj, runMethod);
-        return null;
-      }
-    });
-  }
-
 
 
   private void runMethod(Object obj, String runMethod) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {

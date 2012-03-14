@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="azkaban-common/src/java"/>
-	<classpathentry kind="src" path="webforwarder/src/java"/>
 	<classpathentry kind="src" path="azkaban/src/unit"/>
 	<classpathentry kind="src" path="azkaban/src/java"/>
 	<classpathentry kind="src" path="web"/>
@@ -43,6 +42,5 @@
 	<classpathentry kind="lib" path="lib/jersey-core-1.12.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-server-1.12.jar"/>
 	<classpathentry kind="lib" path="lib/asm-3.3.1.jar"/>
-	<classpathentry kind="lib" path="webforwarder/src/java/azkaban/web/WebForwarder.java"/>
 	<classpathentry kind="output" path="dist/classes"/>
 </classpath>

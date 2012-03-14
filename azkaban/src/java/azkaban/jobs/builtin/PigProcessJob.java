@@ -26,11 +26,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import static azkaban.util.SecurityUtils.PROXY_KEYTAB_LOCATION;
-import static azkaban.util.SecurityUtils.PROXY_USER;
-import static azkaban.util.SecurityUtils.TO_PROXY;
-import static azkaban.util.SecurityUtils.shouldProxy;
-
 public class PigProcessJob extends JavaProcessJob {
     
 	public static final String PIG_SCRIPT = "pig.script";
@@ -49,7 +44,7 @@ public class PigProcessJob extends JavaProcessJob {
 
 	@Override
 	protected String getJavaClass() {
-    return shouldProxy(getProps().toProperties()) ? SECURE_PIG_WRAPPER : PIG_JAVA_CLASS;
+    return PIG_JAVA_CLASS;
 	}
 
 	@Override
@@ -65,19 +60,6 @@ public class PigProcessJob extends JavaProcessJob {
 		if (hadoopUGI != null) {
 			args += " -Dhadoop.job.ugi=" + hadoopUGI;
 		}
-
-    if(shouldProxy(getProps().toProperties())) {
-      info("Setting up secure proxy info for child process");
-      String secure;
-      Properties p = getProps().toProperties();
-      secure = " -D" + PROXY_USER + "=" + p.getProperty(PROXY_USER);
-      secure += " -D" + PROXY_KEYTAB_LOCATION + "=" + p.getProperty(PROXY_KEYTAB_LOCATION);
-      secure += " -D" + TO_PROXY + "=" + p.getProperty(TO_PROXY);
-      info("Secure settings = " + secure);
-      args += secure;
-    } else {
-      info("Not setting up secure proxy info for child process");
-    }
 
 		return args;
 	}
@@ -121,9 +103,6 @@ public class PigProcessJob extends JavaProcessJob {
 			classPath.add(new File(hadoopHome, "conf").getPath());
 		}
 
-		if(shouldProxy(getProps().toProperties())) {
-	        classPath.add(getSourcePathFromClass(SecurePigWrapper.class));
-		}
 		return classPath;
 	}
 
