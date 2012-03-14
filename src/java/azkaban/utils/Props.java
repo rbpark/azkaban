@@ -20,7 +20,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
@@ -46,6 +44,7 @@ import org.apache.log4j.Logger;
 public class Props {
     private final Map<String, String> _current;
     private final Props _parent;
+    private String source = null;
 
     /**
      * Constructor for empty props with empty parent.
@@ -60,47 +59,41 @@ public class Props {
      * @param parent
      */
     public Props(Props parent) {
-        this._current = new ConcurrentHashMap<String, String>();
+        this._current = new HashMap<String, String>();
         this._parent = parent;
     }
 
     /**
-     * Creates props from paths
+     * Load props from a file.
      * 
      * @param parent
-     * @param files
-     *            path to the files.
-     * @throws FileNotFoundException
+     * @param file
      * @throws IOException
      */
-    public Props(Props parent, String... files) throws FileNotFoundException, IOException {
-        this(parent, Arrays.asList(files));
+    public Props(Props parent, String filepath) throws IOException {
+        this(parent, new File(filepath));
     }
-
+    
     /**
-     * Creates props from a list of files
+     * Load props from a file.
      * 
      * @param parent
-     * @param files
-     *            path to the files.
-     * @throws FileNotFoundException
+     * @param file
      * @throws IOException
      */
-    public Props(Props parent, List<String> files) throws FileNotFoundException, IOException {
+    public Props(Props parent, File file) throws IOException {
         this(parent);
-        for (int i = 0; i < files.size(); i++) {
-            InputStream input = new BufferedInputStream(new FileInputStream(new File(files.get(i)).getAbsolutePath()));
+        setSource(file.getPath());
 
-            try {
-                loadFrom(input);
-            }
-            catch (IOException e) {
-                input.close();
-                throw e;
-            }
-
-            input.close();
+        InputStream input = new BufferedInputStream(new FileInputStream(file));
+        try {
+            loadFrom(input);
         }
+        catch (IOException e) {
+            input.close();
+            throw e;
+        }
+        input.close();
     }
 
     /**
@@ -110,11 +103,9 @@ public class Props {
      * @param inputStreams
      * @throws IOException
      */
-    public Props(Props parent, InputStream... inputStreams) throws IOException {
+    public Props(Props parent, InputStream inputStream) throws IOException {
         this(parent);
-        for (InputStream stream : inputStreams) {
-            loadFrom(stream);
-        }
+        loadFrom(inputStream);
     }
 
     /**
@@ -965,5 +956,13 @@ public class Props {
         }
         builder.append("}");
         return builder.toString();
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 }

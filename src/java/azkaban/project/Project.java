@@ -1,13 +1,14 @@
 package azkaban.project;
 import java.util.HashMap;
 
+import azkaban.flow.Flow;
 import azkaban.permission.Permission;
 
 public class Project {
     private final String name;
     private long lastUpdateTime;
     private int uploadVersion;
-    private HashMap<Object, Permission> permissableUserGroup;
+    private HashMap<String, Flow> flows;
     
     public Project(String name) {
         this.name = name;
