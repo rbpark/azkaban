@@ -107,6 +107,7 @@ public class JobExecutorManager {
                     return;
                 }
             }
+
             throw new IllegalArgumentException("'" + id + "' is not currently running.");
         }
         else {
