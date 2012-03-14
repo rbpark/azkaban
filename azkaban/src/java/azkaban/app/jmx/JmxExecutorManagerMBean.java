@@ -26,6 +26,9 @@ public interface JmxExecutorManagerMBean {
     @DisplayName("OPERATION: viewExecutingJobIds ")
     List<String> viewExecutingJobIds();
     
+    @DisplayName("OPERATION: viewExecutingJobIdsInternal - Internal Id of the jobs. ")
+    List<String> viewExecutingJobIdsInternal();
+    
     @DisplayName("OPERATION: kill all jobs with the same name, and remove from list. ")
     String killJobId(
             @ParameterName("jobName : Identifier of the job")

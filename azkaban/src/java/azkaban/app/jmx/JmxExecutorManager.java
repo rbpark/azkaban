@@ -35,6 +35,15 @@ public class JmxExecutorManager implements JmxExecutorManagerMBean {
     }
 
     @Override
+    public List<String> viewExecutingJobIdsInternal() {
+        ArrayList<String> jobNames = new ArrayList<String>();
+        for ( ExecutingJobAndInstance instance: executorManager.getExecutingJobs()) {
+            jobNames.add(instance.getExecutableFlow().getId());
+        }
+        return jobNames;
+    }
+
+    @Override
     public String killJobId(String jobId) {
         try {
             executorManager.cancel(jobId);
