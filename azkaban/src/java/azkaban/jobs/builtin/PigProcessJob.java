@@ -16,13 +16,20 @@
 
 package azkaban.jobs.builtin;
 
+import azkaban.app.JobDescriptor;
+import azkaban.util.StringUtils;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
-import azkaban.app.JobDescriptor;
-import azkaban.util.StringUtils;
+import static azkaban.util.SecurityUtils.PROXY_KEYTAB_LOCATION;
+import static azkaban.util.SecurityUtils.PROXY_USER;
+import static azkaban.util.SecurityUtils.TO_PROXY;
+import static azkaban.util.SecurityUtils.shouldProxy;
 
 public class PigProcessJob extends JavaProcessJob {
     
@@ -33,7 +40,8 @@ public class PigProcessJob extends JavaProcessJob {
 	public static final String HADOOP_UGI = "hadoop.job.ugi";
 	public static final String DEBUG = "debug";
 
-	public static final String PIG_JAVA_CLASS = "org.apache.pig.Main";
+  public static final String PIG_JAVA_CLASS = "org.apache.pig.Main";
+  public static final String SECURE_PIG_WRAPPER = "azkaban.jobs.builtin.SecurePigWrapper";
 
 	public PigProcessJob(JobDescriptor descriptor) {
 		super(descriptor);
@@ -41,7 +49,7 @@ public class PigProcessJob extends JavaProcessJob {
 
 	@Override
 	protected String getJavaClass() {
-		return PIG_JAVA_CLASS;
+    return shouldProxy(getProps().toProperties()) ? SECURE_PIG_WRAPPER : PIG_JAVA_CLASS;
 	}
 
 	@Override
@@ -57,7 +65,20 @@ public class PigProcessJob extends JavaProcessJob {
 		if (hadoopUGI != null) {
 			args += " -Dhadoop.job.ugi=" + hadoopUGI;
 		}
-		
+
+    if(shouldProxy(getProps().toProperties())) {
+      info("Setting up secure proxy info for child process");
+      String secure;
+      Properties p = getProps().toProperties();
+      secure = " -D" + PROXY_USER + "=" + p.getProperty(PROXY_USER);
+      secure += " -D" + PROXY_KEYTAB_LOCATION + "=" + p.getProperty(PROXY_KEYTAB_LOCATION);
+      secure += " -D" + TO_PROXY + "=" + p.getProperty(TO_PROXY);
+      info("Secure settings = " + secure);
+      args += secure;
+    } else {
+      info("Not setting up secure proxy info for child process");
+    }
+
 		return args;
 	}
 
@@ -100,6 +121,9 @@ public class PigProcessJob extends JavaProcessJob {
 			classPath.add(new File(hadoopHome, "conf").getPath());
 		}
 
+		if(shouldProxy(getProps().toProperties())) {
+	        classPath.add(getSourcePathFromClass(SecurePigWrapper.class));
+		}
 		return classPath;
 	}
 
@@ -125,5 +149,25 @@ public class PigProcessJob extends JavaProcessJob {
 
 	protected List<String> getPigParamFiles() {
 		return getProps().getStringList(PIG_PARAM_FILES, null, ",");
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private static String getSourcePathFromClass(Class containedClass) {
+	    File file = new File(containedClass.getProtectionDomain().getCodeSource().getLocation().getPath());
+
+	    if (!file.isDirectory() && file.getName().endsWith(".class")) {
+	        String name = containedClass.getName();
+	        StringTokenizer tokenizer = new StringTokenizer(name, ".");
+	        while(tokenizer.hasMoreTokens()) {
+	            tokenizer.nextElement();
+	            file = file.getParentFile();
+	        }
+	            
+	        return file.getPath();  
+	    }
+	    else {
+	        return containedClass.getProtectionDomain().getCodeSource().getLocation().getPath();
+	    }
 	}
 }

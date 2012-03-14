@@ -3,6 +3,7 @@ package azkaban.jobs;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -75,21 +76,46 @@ public class JobExecutorManager {
     	this.executor = new ThreadPoolExecutor(0, maxThreads, 10, TimeUnit.SECONDS, new LinkedBlockingQueue(), new ExecutorThreadFactory());
     }
     
+    public List<String> getExecutingListById() {
+        return new ArrayList<String>(executing.keySet());
+    }
+    
+    public boolean doesJobExistInExecutingList(String id) {
+        return executing.containsKey(id);
+    }
+    
+    public void removeJobFromExecutingList(String id) {
+        executing.remove(id);
+    }
+    
     /**
      * Cancels an already running job.
      * 
      * @param name
      * @throws Exception
      */
-    public void cancel(String name) throws Exception {
-    	ExecutingJobAndInstance instance = executing.get(name);
+    public void cancel(String id) throws Exception {
+    	ExecutingJobAndInstance instance = executing.get(id);
         if(instance == null) {
-            throw new IllegalArgumentException("'" + name + "' is not currently running.");
+            logger.error("Could not find job with id " + id);
+            for (Map.Entry<String, ExecutingJobAndInstance> entry : executing.entrySet()) {
+                ExecutingJobAndInstance ins = entry.getValue();
+                if ( id.equals(ins.getExecutableFlow().getId())) {
+                    logger.error("Manually found job with " + id + " but under entry " + entry.getKey());
+                    ins.getExecutableFlow().cancel();
+                    executing.remove(entry.getKey());
+                    return;
+                }
+            }
+            throw new IllegalArgumentException("'" + id + "' is not currently running.");
         }
-        
-        instance.getExecutableFlow().cancel();
+        else {
+            logger.error("Found job with id " + id);
+            instance.getExecutableFlow().cancel();
+            executing.remove(id);
+        }
     }
-
+    
     public void cancelAllJobsWithName(String name) throws Exception {
     	for (Map.Entry<String, ExecutingJobAndInstance> entry: executing.entrySet()) {
     		if (entry.getValue().getExecutableFlow().getName().equals(name)) {
@@ -297,6 +323,9 @@ public class JobExecutorManager {
             } catch(UnknownHostException uhe) {
                 logger.error(uhe);
             }
+            catch (Exception e) {
+                logger.error(e);
+            }
         }
     }
 
@@ -323,6 +352,9 @@ public class JobExecutorManager {
                                                      + ".");
             } catch(UnknownHostException uhe) {
                 logger.error(uhe);
+            }
+            catch (Exception e) {
+                logger.error(e);
             }
         }
     }
