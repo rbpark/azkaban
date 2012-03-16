@@ -17,7 +17,6 @@ package azkaban.util;
 
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 
@@ -31,15 +30,40 @@ public class SecurityUtils {
   public static final String PROXY_USER = "proxy.user";
   public static final String TO_PROXY = "user.to.proxy";
 
-  public static UserGroupInformation getProxiedUser(Properties prop, Logger l) throws IOException {
-    String keytab = verifySecureProperty(prop, PROXY_KEYTAB_LOCATION, l);
-    String proxyUser = verifySecureProperty(prop, PROXY_USER, l);
-    String toProxy = verifySecureProperty(prop, TO_PROXY, l);
+  private static UserGroupInformation loginUser = null;
 
-    SecurityUtil.login(new Configuration(), keytab, proxyUser);
-    UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
+  /**
+   * Create a proxied user based on the explicit user name, taking other parameters
+   * necessary from properties file.
+   */
+  public static synchronized UserGroupInformation getProxiedUser(String toProxy, Properties prop, Logger log) throws IOException {
+    if(toProxy == null) {
+      throw new IllegalArgumentException("toProxy can't be null");
+    }
+
+    if (loginUser == null) {
+      log.info("No login user. Creating login user");
+      String keytab = verifySecureProperty(prop, PROXY_KEYTAB_LOCATION, log);
+      String proxyUser = verifySecureProperty(prop, PROXY_USER, log);
+      UserGroupInformation.setConfiguration(new Configuration());
+      UserGroupInformation.loginUserFromKeytab(proxyUser, keytab);
+      log.info("Logged in with user " + loginUser);
+      loginUser = UserGroupInformation.getLoginUser();
+    } else {
+      log.info("loginUser (" + loginUser + ") already created, refreshing tgt.");
+      loginUser.checkTGTAndReloginFromKeytab();
+    }
 
     return UserGroupInformation.createProxyUser(toProxy, loginUser);
+  }
+
+  /**
+   * Create a proxied user, taking all parameters, including which user to proxy
+   * from provided Properties.
+   */
+  public static UserGroupInformation getProxiedUser(Properties prop, Logger log) throws IOException {
+    String toProxy = verifySecureProperty(prop, TO_PROXY, log);
+    return getProxiedUser(toProxy, prop, log);
   }
 
   public static String verifySecureProperty(Properties properties, String s, Logger l) throws IOException {
