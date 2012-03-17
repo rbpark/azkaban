@@ -139,7 +139,6 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             Properties property = prop.toProperties();
             
             String user = getParam(req, "login");
-            setCookieInResponse(resp, SESSION_ID_NAME, user);
             UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
             FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
                 @Override
@@ -151,6 +150,7 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
                     }
                 }});
 
+            setCookieInResponse(resp, SESSION_ID_NAME, user);
             try {
                 handleFSDisplay(fs, user, req, resp);
             } catch (IOException e) {
@@ -213,6 +213,9 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
         }
         catch (AccessControlException e) {
             page.add("error", "Permission denied. User cannot read file or directory");
+        }
+        catch (IOException e) {
+            page.add("error", e.getMessage());
         }
         page.render();
 
