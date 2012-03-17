@@ -108,6 +108,8 @@ public class AzkabanApplication
     private NamedPermitManager _permitManager;
     private ReadWriteLockManager _readWriteLockManager;
     
+    private Props defaultProps;
+    
     public AzkabanApplication(final List<File> jobDirs, final File logDir, final File tempDir, final boolean enableDevMode) throws IOException {
         this._jobDirs = Utils.nonNull(jobDirs);
         this._logsDir = Utils.nonNull(logDir);
@@ -132,7 +134,7 @@ public class AzkabanApplication
             throw new IllegalArgumentException("No job directory given.");
         }
 
-        Props defaultProps = PropsUtils.loadPropsInDirs(_jobDirs, ".properties", ".schema");
+        defaultProps = PropsUtils.loadPropsInDirs(_jobDirs, ".properties", ".schema");
 
         _baseClassLoader = getBaseClassloader();
 
@@ -442,5 +444,9 @@ public class AzkabanApplication
     
     public void reloadJobsFromDisk() {
         getJobManager().updateFlowManager();
+    }
+    
+    public Props getDefaultProps() {
+        return defaultProps;
     }
 }

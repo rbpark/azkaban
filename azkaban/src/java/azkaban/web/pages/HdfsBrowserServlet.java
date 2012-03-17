@@ -18,9 +18,11 @@ package azkaban.web.pages;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -32,13 +34,19 @@ import javax.servlet.http.HttpSession;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.AccessControlException;
+import org.apache.hadoop.security.SecurityUtil;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.Logger;
 
+import azkaban.app.AzkabanApplication;
+import azkaban.common.utils.Props;
 import azkaban.common.web.HdfsAvroFileViewer;
 import azkaban.common.web.HdfsFileViewer;
 import azkaban.common.web.JsonSequenceFileViewer;
 import azkaban.common.web.Page;
 import azkaban.common.web.TextFileViewer;
+import azkaban.util.SecurityUtils;
 import azkaban.web.AbstractAzkabanServlet;
 import azkaban.web.WebUtils;
 
@@ -80,7 +88,7 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             IOException {
         
         String user = getUserFromRequest(req);
-        
+       
         if (user == null) {
             Page page = newPage(req, resp, "azkaban/web/pages/hdfs_browser_login.vm");
             page.render();
@@ -126,15 +134,30 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             Page page = newPage(req, resp, "azkaban/web/pages/hdfs_browser_login.vm");
             page.render();
         } else if(hasParam(req, "login")) {
+            AzkabanApplication app = getApplication();
+            Props prop = app.getDefaultProps();
+            Properties property = prop.toProperties();
+            
             String user = getParam(req, "login");
             setCookieInResponse(resp, SESSION_ID_NAME, user);
-            
-            FileSystem fs = FileSystem.get(conf);
+            UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
+            FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
+                @Override
+                public FileSystem run() {
+                    try {
+                        return FileSystem.get(conf);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }});
+
             try {
                 handleFSDisplay(fs, user, req, resp);
             } catch (IOException e) {
-                fs.close();
                 throw e;
+            }
+            finally {
+                fs.close();
             }
             fs.close();
         }
@@ -143,6 +166,7 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
     private void handleFSDisplay(FileSystem fs, String user, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String prefix = req.getContextPath() + req.getServletPath();
         String fsPath = req.getRequestURI().substring(prefix.length());
+
         if(fsPath.length() == 0)
             fsPath = "/";
 
@@ -183,7 +207,13 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
         page.add("user", user);
         page.add("paths", paths);
         page.add("segments", segments);
-        page.add("subdirs", fs.listStatus(path)); // ??? line
+        
+        try {
+            page.add("subdirs", fs.listStatus(path)); // ??? line
+        }
+        catch (AccessControlException e) {
+            page.add("error", "Permission denied. User cannot read file or directory");
+        }
         page.render();
 
     }
