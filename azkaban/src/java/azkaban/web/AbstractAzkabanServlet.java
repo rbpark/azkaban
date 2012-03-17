@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -111,4 +112,14 @@ public class AbstractAzkabanServlet extends HttpServlet {
         }
     }
 
+    protected Cookie getCookieByName(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        for(Cookie cookie : cookies) {
+            if (name.equals(cookie.getName())) {
+                return cookie;
+            }
+        }
+
+        return null;
+    }
 }

@@ -24,8 +24,10 @@ import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -49,8 +51,7 @@ import azkaban.web.WebUtils;
 public class HdfsBrowserServlet extends AbstractAzkabanServlet {
 
     private static final long serialVersionUID = 1;
-
-    private FileSystem _fs;
+    private static final String SESSION_ID_NAME = "azkaban.session.id";
 
     private ArrayList<HdfsFileViewer> _viewers = new ArrayList<HdfsFileViewer>();
 
@@ -58,7 +59,8 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
     private HdfsFileViewer _defaultViewer = new TextFileViewer();
 
     private static Logger logger = Logger.getLogger(HdfsBrowserServlet.class);
-
+    private Configuration conf;
+    
     public HdfsBrowserServlet() {
         super();
         _viewers.add(new HdfsAvroFileViewer());
@@ -68,19 +70,77 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        try {
-            Configuration conf = new Configuration();
-            conf.setClassLoader(this.getApplication().getClassLoader());
-            _fs = FileSystem.get(conf);
-        } catch(IOException e) {
-            throw new ServletException(e);
-        }
+
+        conf = new Configuration();
+        conf.setClassLoader(this.getApplication().getClassLoader());
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
             IOException {
+        
+        String user = getUserFromRequest(req);
+        
+        if (user == null) {
+            Page page = newPage(req, resp, "azkaban/web/pages/hdfs_browser_login.vm");
+            page.render();
+        }
+        else {
+            FileSystem fs = FileSystem.get(conf);
 
+            try {
+                handleFSDisplay(fs, user, req, resp);
+            } catch (IOException e) {
+                fs.close();
+                throw e;
+            }
+            fs.close();
+        }
+    }
+
+    private void setCookieInResponse(HttpServletResponse resp, String key, String value) {
+        if (value == null) {
+            Cookie cookie = new Cookie(key, "");
+            cookie.setMaxAge(0);
+            resp.addCookie(cookie);
+        }
+        else {
+            Cookie cookie = new Cookie(key, value);
+            resp.addCookie(cookie);
+        }
+    }
+     
+    private String getUserFromRequest(HttpServletRequest req) {
+        Cookie cookie = getCookieByName(req, SESSION_ID_NAME);
+        if (cookie == null) {
+            return null;
+        }
+        return cookie.getValue();
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        if (hasParam(req, "logout")) {
+            setCookieInResponse(resp, SESSION_ID_NAME, null);
+            Page page = newPage(req, resp, "azkaban/web/pages/hdfs_browser_login.vm");
+            page.render();
+        } else if(hasParam(req, "login")) {
+            String user = getParam(req, "login");
+            setCookieInResponse(resp, SESSION_ID_NAME, user);
+            
+            FileSystem fs = FileSystem.get(conf);
+            try {
+                handleFSDisplay(fs, user, req, resp);
+            } catch (IOException e) {
+                fs.close();
+                throw e;
+            }
+            fs.close();
+        }
+    }
+    
+    private void handleFSDisplay(FileSystem fs, String user, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String prefix = req.getContextPath() + req.getServletPath();
         String fsPath = req.getRequestURI().substring(prefix.length());
         if(fsPath.length() == 0)
@@ -90,32 +150,20 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             logger.debug("path=" + fsPath);
 
         Path path = new Path(fsPath);
-        if(!_fs.exists(path))
+        if(!fs.exists(path)) {
             throw new IllegalArgumentException(path.toUri().getPath() + " does not exist.");
-        else if(_fs.isFile(path))
-            displayFile(req, resp, path);
-        else if(_fs.getFileStatus(path).isDir())
-            displayDir(req, resp, path);
-        else
-            throw new IllegalStateException("It exists, it is not a file, and it is not a directory, what is it precious?");
-
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        String action = req.getParameter("action");
-        if("delete".equals(action)) {
-            Path theFile = new Path(req.getParameter("file"));
-            _fs.delete(theFile, true);
-        } else {
-            throw new ServletException("Unknown action '" + action + "'!");
         }
-
+        else if(fs.isFile(path)) {
+            displayFile(fs, req, resp, path);
+        }
+        else if(fs.getFileStatus(path).isDir()) {
+                displayDir(fs, user, req, resp, path);
+        } else {
+            throw new IllegalStateException("It exists, it is not a file, and it is not a directory, what is it precious?");
+        }
     }
 
-    private void displayDir(HttpServletRequest req, HttpServletResponse resp, Path path)
+    private void displayDir(FileSystem fs, String user, HttpServletRequest req, HttpServletResponse resp, Path path)
             throws IOException {
 
         Page page = newPage(req, resp, "azkaban/web/pages/hdfs_browser_dir.vm");
@@ -132,14 +180,15 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
         Collections.reverse(paths);
         Collections.reverse(segments);
 
+        page.add("user", user);
         page.add("paths", paths);
         page.add("segments", segments);
-        page.add("subdirs", _fs.listStatus(path)); // ??? line
+        page.add("subdirs", fs.listStatus(path)); // ??? line
         page.render();
 
     }
 
-    private void displayFile(HttpServletRequest req, HttpServletResponse resp, Path path)
+    private void displayFile(FileSystem fs, HttpServletRequest req, HttpServletResponse resp, Path path)
             throws IOException {
 
         int startLine = WebUtils.getInt(req, "start_line", 1);
@@ -149,8 +198,8 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
         boolean outputed = false;
         OutputStream output = resp.getOutputStream();
         for(HdfsFileViewer viewer: _viewers) {
-            if(viewer.canReadFile(_fs, path)) {
-                viewer.displayFile(_fs, path, output, startLine, endLine);
+            if(viewer.canReadFile(fs, path)) {
+                viewer.displayFile(fs, path, output, startLine, endLine);
                 outputed = true;
                 break; // don't need to try other viewers
             }
@@ -158,8 +207,8 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
 
         // use default text viewer
         if(!outputed) {
-            if(_defaultViewer.canReadFile(_fs, path)) {
-                _defaultViewer.displayFile(_fs, path, output, startLine, endLine);
+            if(_defaultViewer.canReadFile(fs, path)) {
+                _defaultViewer.displayFile(fs, path, output, startLine, endLine);
             } else {
                 output.write(("Sorry, no viewer available for this file. ").getBytes("UTF-8"));
             }

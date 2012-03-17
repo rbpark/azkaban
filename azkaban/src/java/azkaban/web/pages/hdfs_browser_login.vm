@@ -1,0 +1,62 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>#appname()</title>
+    <link rel="stylesheet" type="text/css" href="${context}/static/css/style.css"></link>
+    <link rel="stylesheet" type="text/css" href="${context}/static/css/azkaban-common.css"></link>
+    <style>
+      
+      .breadcrumbs {
+     	text-align:center;
+        font-size: 24pt;
+        color: #CCC;
+        font-weight: bold;
+        padding: 10px;
+      }
+      
+      .breadcrumbs a:hover {
+      	color: #FFF;
+      }
+      
+      .breadcrumbs a {
+        color: #CCC;
+        text-decoration: none;
+      }
+      .subdirs {
+        padding: 20px;
+        text-align: left;
+        font-size: 16pt;
+        color: black;
+        background-color: white;
+        border: 1px solid black;
+        margin: auto;
+      }  
+      .fileTable {
+        margin: auto;
+      }
+      .fileTable td {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    #appnamebox()
+    <div id="main">
+        <h2 class="title" >Hadoop File Viewer</h2>
+  	    <div id="variableWidth">
+  	        #messages()
+  	       <div class="box">
+              <form class="login-form" method="post">
+                    <p class="login-label">Username</p>
+                    <input type="text" name="login" class="login-textbox" ></input>
+
+                    <input class="btn2 button1" type="submit" value="Login" class="login-submit"/>
+               </form>
+  	       </div>
+  	    </div>
+  	</div>
+  </body>
+</html>

@@ -40,12 +40,29 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         padding-left: 10px;
         padding-right: 10px;
       }
+      .logout-label {
+        float: right;
+        margin: 3px;
+      }
+      .logout-submit {
+        float: right;
+      }
+      
+
+      #variableWidth {
+        clear: both;
+      }
     </style>
   </head>
   <body>
     #appnamebox()
     <div id="main">
         <h2 class="title" >Hadoop File Viewer</h2>
+        <form class="logout-form" method="post">
+              <input type="hidden" name="logout" ></input>
+              <input type="submit" value="Logout" class="logout-submit"/>
+              <p class="logout-label">${user}</p>
+         </form>
   	    <div id="variableWidth">
   	        #messages()
   	       <div class="box">
