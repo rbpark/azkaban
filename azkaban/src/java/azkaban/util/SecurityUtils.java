@@ -47,8 +47,8 @@ public class SecurityUtils {
       String proxyUser = verifySecureProperty(prop, PROXY_USER, log);
       UserGroupInformation.setConfiguration(new Configuration());
       UserGroupInformation.loginUserFromKeytab(proxyUser, keytab);
-      log.info("Logged in with user " + loginUser);
       loginUser = UserGroupInformation.getLoginUser();
+      log.info("Logged in with user " + loginUser);
     } else {
       log.info("loginUser (" + loginUser + ") already created, refreshing tgt.");
       loginUser.checkTGTAndReloginFromKeytab();
