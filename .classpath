@@ -37,8 +37,8 @@
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/json_simple-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/hadoop-core-0.20.204.0.jar"/>
 	<classpathentry kind="lib" path="lib/pig-0.9.1-withouthadoop.jar"/>
 	<classpathentry kind="lib" path="lib/commons-configuration-1.8.jar"/>
+	<classpathentry kind="lib" path="lib/hadoop-core-1.0.0-p8.jar"/>
 	<classpathentry kind="output" path="dist/classes"/>
 </classpath>
