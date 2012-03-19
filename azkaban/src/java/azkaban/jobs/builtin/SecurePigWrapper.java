@@ -28,7 +28,7 @@ import static azkaban.util.SecurityUtils.getProxiedUser;
 public class SecurePigWrapper {
   public static void main(final String[] args) throws IOException, InterruptedException {
     Logger logger = Logger.getRootLogger();
-    Properties p = new Properties();
+    Properties p = System.getProperties();
     Configuration conf = new Configuration();
 
     getProxiedUser(p, logger, conf).doAs(new PrivilegedExceptionAction<Void>() {
