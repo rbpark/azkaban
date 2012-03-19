@@ -80,7 +80,11 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
         super.init(config);
 
         conf = new Configuration();
+        logger.info("HDFS Browser init");
         conf.setClassLoader(this.getApplication().getClassLoader());
+        logger.info("hadoop.security.authentication set to " + conf.get("hadoop.security.authentication"));
+        logger.info("hadoop.security.authorization set to " + conf.get("hadoop.security.authorization"));
+        logger.info("DFS name " + conf.get("fs.default.name"));
     }
 
     @Override
@@ -94,7 +98,20 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             page.render();
         }
         else {
-            FileSystem fs = FileSystem.get(conf);
+            AzkabanApplication app = getApplication();
+            Props prop = app.getDefaultProps();
+            Properties property = prop.toProperties();
+            
+            UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
+            FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
+                @Override
+                public FileSystem run() {
+                    try {
+                        return FileSystem.get(conf);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }});
 
             try {
                 handleFSDisplay(fs, user, req, resp);
@@ -139,6 +156,9 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             Properties property = prop.toProperties();
             
             String user = getParam(req, "login");
+            logger.info("hadoop.security.authentication set to " + conf.get("hadoop.security.authentication"));
+            logger.info("hadoop.security.authorization set to " + conf.get("hadoop.security.authorization"));
+            
             UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
             logger.info("Logging in as " + user);
             FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
