@@ -36,19 +36,22 @@ public class SecurityUtils {
    * Create a proxied user based on the explicit user name, taking other parameters
    * necessary from properties file.
    */
-  public static synchronized UserGroupInformation getProxiedUser(String toProxy, Properties prop, Logger log) throws IOException {
+  public static synchronized UserGroupInformation getProxiedUser(String toProxy, Properties prop, Logger log, Configuration conf) throws IOException {
     if(toProxy == null) {
       throw new IllegalArgumentException("toProxy can't be null");
+    }
+    if(conf == null) {
+      throw new IllegalAccessError("conf can't be null");
     }
 
     if (loginUser == null) {
       log.info("No login user. Creating login user");
       String keytab = verifySecureProperty(prop, PROXY_KEYTAB_LOCATION, log);
       String proxyUser = verifySecureProperty(prop, PROXY_USER, log);
-      UserGroupInformation.setConfiguration(new Configuration());
+      UserGroupInformation.setConfiguration(conf);
       UserGroupInformation.loginUserFromKeytab(proxyUser, keytab);
-      log.info("Logged in with user " + loginUser);
       loginUser = UserGroupInformation.getLoginUser();
+      log.info("Logged in with user " + loginUser);
     } else {
       log.info("loginUser (" + loginUser + ") already created, refreshing tgt.");
       loginUser.checkTGTAndReloginFromKeytab();
@@ -61,9 +64,9 @@ public class SecurityUtils {
    * Create a proxied user, taking all parameters, including which user to proxy
    * from provided Properties.
    */
-  public static UserGroupInformation getProxiedUser(Properties prop, Logger log) throws IOException {
+  public static UserGroupInformation getProxiedUser(Properties prop, Logger log, Configuration conf) throws IOException {
     String toProxy = verifySecureProperty(prop, TO_PROXY, log);
-    return getProxiedUser(toProxy, prop, log);
+    return getProxiedUser(toProxy, prop, log, conf);
   }
 
   public static String verifySecureProperty(Properties properties, String s, Logger l) throws IOException {

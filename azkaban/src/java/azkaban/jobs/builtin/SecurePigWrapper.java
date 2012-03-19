@@ -15,6 +15,7 @@
  */
 package azkaban.jobs.builtin;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.pig.Main;
 
@@ -22,22 +23,15 @@ import java.io.IOException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 
-import static azkaban.util.SecurityUtils.PROXY_KEYTAB_LOCATION;
-import static azkaban.util.SecurityUtils.PROXY_USER;
-import static azkaban.util.SecurityUtils.TO_PROXY;
 import static azkaban.util.SecurityUtils.getProxiedUser;
-import static azkaban.util.SecurityUtils.verifySecureProperty;
 
 public class SecurePigWrapper {
   public static void main(final String[] args) throws IOException, InterruptedException {
     Logger logger = Logger.getRootLogger();
     Properties p = new Properties();
-    // No need to check if we should should.proxy - if we're called, we should.
-    for(String s : new String [] {PROXY_KEYTAB_LOCATION, PROXY_USER, TO_PROXY}) {
-      p.put(s, verifySecureProperty(System.getProperties(), s, logger));
-    }
+    Configuration conf = new Configuration();
 
-    getProxiedUser(p, logger).doAs(new PrivilegedExceptionAction<Void>() {
+    getProxiedUser(p, logger, conf).doAs(new PrivilegedExceptionAction<Void>() {
       @Override
       public Void run() throws Exception {
         Main.main(args);

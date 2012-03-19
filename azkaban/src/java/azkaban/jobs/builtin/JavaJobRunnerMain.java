@@ -18,8 +18,6 @@ package azkaban.jobs.builtin;
 import azkaban.common.utils.Props;
 import azkaban.util.SecurityUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.security.SecurityUtil;
-import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
@@ -137,7 +135,7 @@ public class JavaJobRunnerMain {
     }
 
   private void runMethodAsProxyUser(Properties prop, final Object obj, final String runMethod) throws IOException, InterruptedException {
-    SecurityUtils.getProxiedUser(prop, _logger).doAs(new PrivilegedExceptionAction<Void>() {
+    SecurityUtils.getProxiedUser(prop, _logger, new Configuration()).doAs(new PrivilegedExceptionAction<Void>() {
       @Override
       public Void run() throws Exception {
         runMethod(obj, runMethod);
