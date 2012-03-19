@@ -102,7 +102,7 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             Props prop = app.getDefaultProps();
             Properties property = prop.toProperties();
             
-            UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
+            UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger, conf);
             FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
                 @Override
                 public FileSystem run() {
@@ -159,7 +159,7 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             logger.info("hadoop.security.authentication set to " + conf.get("hadoop.security.authentication"));
             logger.info("hadoop.security.authorization set to " + conf.get("hadoop.security.authorization"));
             
-            UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
+            UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger, conf);
             logger.info("Logging in as " + user);
             FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
                 @Override
