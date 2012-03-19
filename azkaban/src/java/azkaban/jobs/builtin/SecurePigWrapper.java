@@ -15,6 +15,7 @@
  */
 package azkaban.jobs.builtin;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.apache.pig.Main;
 
@@ -28,9 +29,9 @@ public class SecurePigWrapper {
   public static void main(final String[] args) throws IOException, InterruptedException {
     Logger logger = Logger.getRootLogger();
     Properties p = new Properties();
+    Configuration conf = new Configuration();
 
-
-    getProxiedUser(p, logger).doAs(new PrivilegedExceptionAction<Void>() {
+    getProxiedUser(p, logger, conf).doAs(new PrivilegedExceptionAction<Void>() {
       @Override
       public Void run() throws Exception {
         Main.main(args);
