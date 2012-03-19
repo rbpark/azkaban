@@ -82,6 +82,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 			        <table class="fileTable">
 			          <tr>
 			            <th>File</th>
+			            <th>Permission</th>
 			            <th>Owner/Group</th>
 			            <th>Size</th>
 			            <th>Modified Date</th>
@@ -92,6 +93,9 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 			              <a href="$context/fs${status.getPath().toUri().getPath()}">
 			                ${status.path.name}#if($status.isDir())/#end
 			              </a>
+			              </td>
+			              <td>
+			                ${status.permission}
 			              </td>
 			              <td>
 			              	${status.owner}/${status.group}
