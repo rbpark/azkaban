@@ -179,7 +179,7 @@ public class IndividualJobExecutableFlow implements ExecutableFlow
                         try {
                             job.run();
                         }
-                        catch (Exception e) {
+                        catch (Throwable e) {
                             synchronized (sync) {
                                 jobState = Status.FAILED;
                                 returnProps = new Props();
@@ -192,7 +192,7 @@ public class IndividualJobExecutableFlow implements ExecutableFlow
                                     System.currentTimeMillis(),
                                     JobAction.END_WORKFLOW_JOB,
                                     JobState.FAILED);
-                            
+
                             callCallbacks(callbackList, jobState);
 
                             throw new RuntimeException(e);
