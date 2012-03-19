@@ -140,6 +140,7 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
             
             String user = getParam(req, "login");
             UserGroupInformation ugi = SecurityUtils.getProxiedUser(user, property, logger);
+            logger.info("Logging in as " + user);
             FileSystem fs = ugi.doAs(new PrivilegedAction<FileSystem>(){
                 @Override
                 public FileSystem run() {
