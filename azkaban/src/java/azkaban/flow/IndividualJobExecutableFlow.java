@@ -179,7 +179,7 @@ public class IndividualJobExecutableFlow implements ExecutableFlow
                         try {
                             job.run();
                         }
-                        catch (Exception e) {
+                        catch (Throwable e) {
                             synchronized (sync) {
                                 jobState = Status.FAILED;
                                 returnProps = new Props();

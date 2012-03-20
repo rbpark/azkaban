@@ -66,15 +66,17 @@ public class ScheduleManager {
     	this.runner.shutdown();
     }
     
+    
+    
     /**
      * Retrieves a copy of the list of schedules.
      * 
      * @return
      */
-    public synchronized List<ScheduledJob> getSchedule() {
+    private List<ScheduledJob> getSchedule() {
     	return runner.getSchedule();
     }
-
+    
     /**
      * Returns the scheduled job for the job name
      * 
@@ -178,7 +180,7 @@ public class ScheduleManager {
     	 * Return a list of scheduled job
     	 * @return
     	 */
-    	public synchronized List<ScheduledJob> getSchedule() {
+    	public List<ScheduledJob> getSchedule() {
     		return new ArrayList<ScheduledJob>(schedule);
     	}
     	
