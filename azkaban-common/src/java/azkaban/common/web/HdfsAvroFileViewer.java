@@ -28,7 +28,7 @@ public class HdfsAvroFileViewer implements HdfsFileViewer {
 
     private static Logger logger = Logger.getLogger(HdfsAvroFileViewer.class);
     // Will spend 5 seconds trying to pull data and then stop.
-    private static long STOP_TIME = 5000l;
+    private static long STOP_TIME = 2000l;
     
     @Override
     public boolean canReadFile(FileSystem fs, Path path) {
