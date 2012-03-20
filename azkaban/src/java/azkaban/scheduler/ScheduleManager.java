@@ -73,7 +73,7 @@ public class ScheduleManager {
      * 
      * @return
      */
-    private List<ScheduledJob> getSchedule() {
+    public List<ScheduledJob> getSchedule() {
     	return runner.getSchedule();
     }
     
