@@ -251,32 +251,21 @@ public class HdfsBrowserServlet extends AbstractAzkabanServlet {
 
         // use registered viewers to show the file content
         boolean outputed = false;
-        OutputStream output = null;
-        
-        try {
-            output = resp.getOutputStream();
-            for(HdfsFileViewer viewer: _viewers) {
-                if(viewer.canReadFile(fs, path)) {
-                    viewer.displayFile(fs, path, output, startLine, endLine);
-                    outputed = true;
-                    break; // don't need to try other viewers
-                }
+        OutputStream output = resp.getOutputStream();
+        for(HdfsFileViewer viewer: _viewers) {
+            if(viewer.canReadFile(fs, path)) {
+                viewer.displayFile(fs, path, output, startLine, endLine);
+                outputed = true;
+                break; // don't need to try other viewers
             }
-    
-            // use default text viewer
-            if(!outputed) {
-                if(_defaultViewer.canReadFile(fs, path)) {
-                    _defaultViewer.displayFile(fs, path, output, startLine, endLine);
-                } else {
-                    output.write(("Sorry, no viewer available for this file. ").getBytes("UTF-8"));
-                }
-            }
-        } catch (IOException e) {
-            throw e;
         }
-        finally  {
-            if (output != null) {
-                output.close();
+
+        // use default text viewer
+        if(!outputed) {
+            if(_defaultViewer.canReadFile(fs, path)) {
+                _defaultViewer.displayFile(fs, path, output, startLine, endLine);
+            } else {
+                output.write(("Sorry, no viewer available for this file. ").getBytes("UTF-8"));
             }
         }
     }
