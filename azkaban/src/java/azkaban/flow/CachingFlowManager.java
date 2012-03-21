@@ -19,7 +19,6 @@ package azkaban.flow;
 import azkaban.common.utils.Props;
 import azkaban.flow.ExecutableFlow;
 import azkaban.flow.Flow;
-import azkaban.jobs.Status;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -30,11 +29,8 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 import org.apache.log4j.Logger;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -46,10 +42,13 @@ import java.util.Set;
 public class CachingFlowManager implements FlowManager
 {
     private static final Logger log = Logger.getLogger(CachingFlowManager.class);
+
     private final FlowManager baseManager;
     private CacheManager manager = CacheManager.create();
     private Cache cache;
-
+    private long cleanInterval = 60000;
+    private long nextCleanTime = 0;
+    
     public CachingFlowManager(FlowManager baseManager, final int cacheSize, final long timeToIdle)
     {
         this.baseManager = baseManager;
@@ -57,14 +56,28 @@ public class CachingFlowManager implements FlowManager
         config.setName("flowhistory");
         config.setMaxEntriesLocalHeap(cacheSize);
         config.setTimeToIdleSeconds(timeToIdle);
+        
         config.eternal(false);
         config.diskPersistent(false);
         config.memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LRU);
-        
+        log.info("Creating Flow cache of size " + cacheSize + " and tti of " + timeToIdle);
         cache = new Cache(config);
         manager.addCache(cache);
+
+        cleanInterval = timeToIdle;
     }
 
+    private void cleanCache() {
+        if(nextCleanTime < System.currentTimeMillis()) {
+            int cacheSize = cache.getSize();
+            cache.evictExpiredElements();
+            log.info("Evicted from CachingFlowManager: " + (cacheSize - cache.getSize()));
+            
+            nextCleanTime = System.currentTimeMillis() + cleanInterval;
+        }
+    }
+    
+    
     public boolean hasFlow(String name)
     {
         return baseManager.hasFlow(name);
@@ -91,6 +104,10 @@ public class CachingFlowManager implements FlowManager
         return baseManager.iterator();
     }
 
+    public Cache getCache() {
+        return cache;
+    }
+    
     public ExecutableFlow createNewExecutableFlow(String name)
     {
         final ExecutableFlow retVal = baseManager.createNewExecutableFlow(name);
@@ -152,6 +169,7 @@ public class CachingFlowManager implements FlowManager
 
     private void addToCache(FlowExecutionHolder retVal)
     {
+        cleanCache();
         if (retVal == null || retVal.getFlow() == null) {
             return;
         }
@@ -169,4 +187,5 @@ public class CachingFlowManager implements FlowManager
 	public List<String> getRootNamesByFolder(String folder) {
 		return baseManager.getRootNamesByFolder(folder);
 	}
+	
 }

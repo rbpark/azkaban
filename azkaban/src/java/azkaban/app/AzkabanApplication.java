@@ -35,6 +35,7 @@ import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.joda.time.DateTimeZone;
 
+import azkaban.app.jmx.CacheFlowManager;
 import azkaban.app.jmx.JmxExecutorManager;
 import azkaban.app.jmx.JobScheduler;
 import azkaban.app.jmx.RefreshJobs;
@@ -104,6 +105,7 @@ public class AzkabanApplication
     private ObjectName jobRefresherName;
     private ObjectName jobSchedulerName;
     private ObjectName jobExecutorName;
+    private ObjectName cacheManagerName;
     
     private NamedPermitManager _permitManager;
     private ReadWriteLockManager _readWriteLockManager;
@@ -274,6 +276,7 @@ public class AzkabanApplication
             jobRefresherName = new ObjectName("azkaban.app.jmx.RefreshJobs:name=jobRefresher");
             jobSchedulerName = new ObjectName("azkaban.app.jmx.JobScheduler:name=jobScheduler");
             jobExecutorName = new ObjectName("azkaban.app.jmx.JmxExecutorManager:name=jobExecutor");
+            cacheManagerName = new ObjectName("azkaban.app.jmx.CacheFlowManager:name=cacheFlowManager");
             
             mbeanServer.registerMBean(new RefreshJobs(this), jobRefresherName);
             logger.info("Bean " + jobRefresherName.getCanonicalName() + " registered.");
@@ -281,6 +284,8 @@ public class AzkabanApplication
             logger.info("Bean " + jobSchedulerName.getCanonicalName() + " registered.");
             mbeanServer.registerMBean(new JmxExecutorManager(_jobExecutorManager, _permitManager, _readWriteLockManager), jobExecutorName);
             logger.info("Bean " + jobExecutorName.getCanonicalName() + " registered.");
+            mbeanServer.registerMBean(new CacheFlowManager((CachingFlowManager)_allFlows), cacheManagerName);
+            logger.info("Bean " + cacheManagerName.getCanonicalName() + " registered.");
         }
         catch(Exception e) {
             logger.error("Failed to configure MBeanServer", e);
@@ -291,6 +296,8 @@ public class AzkabanApplication
         try {
             mbeanServer.unregisterMBean(jobRefresherName);
             mbeanServer.unregisterMBean(jobSchedulerName);
+            mbeanServer.unregisterMBean(jobExecutorName);
+            mbeanServer.unregisterMBean(cacheManagerName);
         } catch (Exception e) {
             logger.error("Failed to cleanup MBeanServer", e);
         }
