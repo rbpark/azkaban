@@ -192,13 +192,6 @@ public class IndexServlet extends AbstractAzkabanServlet {
                 }
             }
         }
-        
-        String name = getParam(req, "name");
-        try {
-			app.getJobExecutorManager().cancel(name);
-            logger.error("Error: Had to force deletion for " + name);	
-		} catch (Exception e1) {
-		}
     }
 
     private String scheduleJobs(AzkabanApplication app,
