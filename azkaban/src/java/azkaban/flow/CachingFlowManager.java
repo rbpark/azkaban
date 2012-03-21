@@ -64,7 +64,7 @@ public class CachingFlowManager implements FlowManager
         cache = new Cache(config);
         manager.addCache(cache);
 
-        cleanInterval = timeToIdle;
+        cleanInterval = timeToIdle * 1000;
     }
 
     private void cleanCache() {
