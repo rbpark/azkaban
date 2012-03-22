@@ -454,6 +454,7 @@ public class JobExecutorManager {
 
                     @Override
                     public void completed(Status status) {
+                        logger.info("Flow " + flow.getId() + ": " + jobDescriptor.getId() + " completed status " + status);
                     	runningJob.setEndTime(new DateTime());
 
                     	MonitorImpl.getInternalMonitorInterface().workflowEvent(flow.getId(), 
@@ -494,6 +495,7 @@ public class JobExecutorManager {
                             executing.remove(runningJob.getId());
                             throw e;
                         } finally {
+                            logger.info("Flow " + flow.getId() + ": " + jobDescriptor.getId() + " completed.");
                             // mark the job as completed
                             executing.remove(runningJob.getId());
                             completed.put(runningJob.getId(), runningJob);

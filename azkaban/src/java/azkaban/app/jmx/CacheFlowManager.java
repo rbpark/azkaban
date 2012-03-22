@@ -11,12 +11,32 @@ public class CacheFlowManager implements CacheFlowManagerMBean {
     
     @Override
     public int getCacheSize() {
-        return this.manager.getCache().getSize();
+        return this.manager.getCacheSize();
     }
 
     @Override
+    public long getCleanIntervalMillisec() {
+        return this.manager.getCleanInterval();
+    }
+    
+    @Override
+    public void setCleanIntervalMillisec(long interval) {
+        this.manager.setCleanInterval(interval);
+    }
+    
+    @Override
+    public long getTimeToIdleMillisec() {
+        return this.manager.getTimeToIdle();
+    }
+    
+    @Override
+    public void setTimeToIdleMillisec(long millisec) {
+        this.manager.setTimeToIdleMillisec(millisec);
+    }
+    
+    @Override
     public void purgeCache() {
-        this.manager.getCache().evictExpiredElements();
+        this.manager.evictFinishedIdleFlows();
     }
 
 }
