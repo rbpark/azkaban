@@ -19,6 +19,7 @@ package azkaban.flow;
 import azkaban.common.utils.Props;
 import azkaban.jobs.Status;
 
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ import java.util.Map;
  */
 public class ComposedExecutableFlow implements ExecutableFlow
 {
-
+    private static final Logger logger = Logger.getLogger(ComposedExecutableFlow.class);
     private final Object sync = new Object();
     private final String id;
     private final ExecutableFlow depender;
@@ -62,6 +63,7 @@ public class ComposedExecutableFlow implements ExecutableFlow
         this.dependee = dependee;
 
         final Status dependerState = depender.getStatus();
+
         switch (dependerState) {
         	case IGNORED:
             case READY:
@@ -112,6 +114,7 @@ public class ComposedExecutableFlow implements ExecutableFlow
                 endTime = depender.getEndTime();
                 parentProps = dependee.getParentProps();
         }
+        
     }
 
     @Override
@@ -132,7 +135,7 @@ public class ComposedExecutableFlow implements ExecutableFlow
         if (parentProps == null) {
             parentProps = new Props();
         }
-
+        Status oldStatus = jobState;
         synchronized (sync) {
             if (this.parentProps == null) {
                 this.parentProps = parentProps;
@@ -153,17 +156,21 @@ public class ComposedExecutableFlow implements ExecutableFlow
                 case READY:
                     jobState = Status.RUNNING;
                     callbacksToCall.add(callback);
+                    logger.info("Flow " + this.getId() + " Composed " + this.getName() + " " + oldStatus + " > " + jobState);
                     break;
                 case RUNNING:
                     callbacksToCall.add(callback);
+                    logger.info("Flow " + this.getId() + " Composed " + this.getName() + " " + oldStatus + " > " + jobState);
                     return;
                 case COMPLETED:
                 case SUCCEEDED:
                     callback.completed(Status.SUCCEEDED);
+                    logger.info("Flow " + this.getId() + " Composed " + this.getName() + " " + oldStatus + " > " + jobState);
                     return;
                 case FAILED:
                     callback.completed(Status.FAILED);
                 default:
+                    logger.info("Flow " + this.getId() + " Composed " + this.getName() + " " + oldStatus + " > " + jobState);
                     return;
             }
         }
@@ -174,6 +181,7 @@ public class ComposedExecutableFlow implements ExecutableFlow
 
         try {
             dependee.execute(parentProps, new DependeeCallback());
+            logger.info("Flow " + this.getId() + " Composed Finished Dependee " + dependee.getName() + " status " + dependee.getStatus());
         }
         catch (RuntimeException e) {
             final List<FlowCallback> callbacks;
@@ -183,8 +191,12 @@ public class ComposedExecutableFlow implements ExecutableFlow
             }
 
             callCallbacks(callbacks, Status.FAILED);
+            logger.info("Flow " + this.getId() + " Composed Finished Dependee " + dependee.getName() + " status " + dependee.getStatus());
 
             throw e;
+        }
+        catch (Exception e) {
+            logger.info("Flow " + this.getId() + " Composed " + this.getName() + " " + oldStatus + " > " + jobState);
         }
     }
 

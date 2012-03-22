@@ -113,23 +113,28 @@ public class IndividualJobExecutableFlow implements ExecutableFlow
                 );
             }
 
-            switch (jobState) {
+            Status oldStatus = jobState;
+            switch (oldStatus) {
                 case READY:
                     jobState = Status.RUNNING;
                     startTime = new DateTime();
                     callbacksToCall.add(callback);
+                    logger.info("Flow " + this.getId() + " Individual " + this.getName() + " " + oldStatus + " > " + jobState);
                     break;
                 case RUNNING:
                     callbacksToCall.add(callback);
+                    logger.info("Flow " + this.getId() + " Individual " + this.getName() + " " + oldStatus + " > " + jobState);
                     return;
                 case IGNORED:
                 	jobState = Status.COMPLETED;
                 case COMPLETED:
                 case SUCCEEDED:
                     callback.completed(Status.SUCCEEDED);
+                    logger.info("Flow " + this.getId() + " Individual " + this.getName() + " " + oldStatus + " > " + jobState);
                     return;
                 case FAILED:
                     callback.completed(Status.FAILED);
+                    logger.info("Flow " + this.getId() + " Individual " + this.getName() + " " + oldStatus + " > " + jobState);
                     return;     	
             }
         }
@@ -192,7 +197,7 @@ public class IndividualJobExecutableFlow implements ExecutableFlow
                                     System.currentTimeMillis(),
                                     JobAction.END_WORKFLOW_JOB,
                                     JobState.FAILED);
-                            
+
                             callCallbacks(callbackList, jobState);
 
                             throw new RuntimeException(e);
