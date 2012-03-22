@@ -15,23 +15,25 @@ public class CacheFlowManager implements CacheFlowManagerMBean {
     }
 
     @Override
-    public long getCleanIntervalMillisec() {
+    public long getCleanInterval() {
         return this.manager.getCleanInterval();
     }
     
     @Override
-    public void setCleanIntervalMillisec(long interval) {
+    public String setCleanInterval(long interval) {
         this.manager.setCleanInterval(interval);
+        return "success";
     }
     
     @Override
-    public long getTimeToIdleMillisec() {
+    public long getTimeToIdle() {
         return this.manager.getTimeToIdle();
     }
     
     @Override
-    public void setTimeToIdleMillisec(long millisec) {
+    public String setTimeToIdle(long millisec) {
         this.manager.setTimeToIdleMillisec(millisec);
+        return "success";
     }
     
     @Override

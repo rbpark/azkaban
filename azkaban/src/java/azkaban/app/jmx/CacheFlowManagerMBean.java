@@ -2,20 +2,26 @@ package azkaban.app.jmx;
 
 public interface CacheFlowManagerMBean {
     @DisplayName("OPERATION: getCacheSize")
-    public int getCacheSize();
+    int getCacheSize();
     
-    @DisplayName("OPERATION: purgeCache")
-    public void purgeCache();
-
-    @DisplayName("OPERATION: getCleanIntervalMillisec")
-    public long getCleanIntervalMillisec();
+    @DisplayName("OPERATION: purgeCache ")
+    void purgeCache();
     
-    @DisplayName("OPERATION: setCleanIntervalMillisec")
-    public void setCleanIntervalMillisec(long interval);
+    @DisplayName("OPERATION: getTimeToIdle")
+    long getTimeToIdle();
     
-    @DisplayName("OPERATION: getTimeToIdleMillisec")
-    public long getTimeToIdleMillisec();
+    @DisplayName("OPERATION: setTimeToIdle")
+    String setTimeToIdle(
+            @ParameterName("millisec : The idle age in millisec")
+            long millisec
+     );
     
-    @DisplayName("OPERATION: setTimeToIdleMillisec")
-    public void setTimeToIdleMillisec(long millisec);
+    @DisplayName("OPERATION: getCleanInterval ")
+    long getCleanInterval();
+    
+    @DisplayName("OPERATION: Set the clean interval ")
+    String setCleanInterval(
+            @ParameterName("interval : The interval in millisec")
+            long interval
+     );
 }

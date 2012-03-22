@@ -206,8 +206,8 @@ public class AzkabanApplication
                         executionsStorageDir,
                         lastExecutionId
                 ),
-                defaultProps.getInt("azkaban.flow.cache.size", 1000),
-                defaultProps.getInt("azkaban.flow.cache.tti", 600)
+                defaultProps.getInt("azkaban.flow.cache.size", 2000),
+                defaultProps.getInt("azkaban.flow.cache.tti", 60000)
         );
         _jobManager.setFlowManager(_allFlows);
 
