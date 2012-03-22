@@ -192,6 +192,12 @@ public class IndexServlet extends AbstractAzkabanServlet {
                 }
             }
         }
+        
+        try {
+            app.getJobExecutorManager().cancel(jobId);
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+        }
     }
 
     private String scheduleJobs(AzkabanApplication app,
