@@ -366,6 +366,8 @@ public class JobManager {
 
     private String getJobPath(File baseDir, File currDir) {
         try {
+		logger.debug("Curr dir canonical " + currDir.getCanonicalPath());
+                logger.debug("Base dir canonical " + baseDir.getCanonicalPath());
             return currDir.getCanonicalPath().substring(baseDir.getCanonicalPath().length());
         } catch(IOException e) {
             throw new JobLoadException("Error while cannonicalizing job path.", e);
