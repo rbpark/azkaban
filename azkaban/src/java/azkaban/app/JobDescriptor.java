@@ -29,12 +29,12 @@ import azkaban.common.utils.Props;
  * A job descriptor represents the configuration information for a job This
  * includes the job class, the job properties, the job dependencies, and the
  * job's id.
- * 
+ *
  * This serves as a template for creating Job instances when the time comes to
  * run the Job.
- * 
+ *
  * @author jkreps
- * 
+ *
  */
 public class JobDescriptor {
 
@@ -46,6 +46,7 @@ public class JobDescriptor {
     public static final String RETRY_BACKOFF = "retry.backoff";
     public static final String JOB_PERMITS = "job.permits";
     public static final String NOTIFY_EMAIL = "notify.emails";
+    public static final String NOTIFY_FAILURE_EMAIL = "notify.failure.emails";
     public static final String LOGGER_PATTERN = "logger.pattern";
     public static final String MAIL_SENDER = "mail.sender";
     public static final String SEND_SUCCESS_EMAIL = "azkaban.send.success.email";
@@ -71,6 +72,7 @@ public class JobDescriptor {
     private final List<String> _writeResourceLocks;
     private final String _sourceEmailList;
     private final List<String> _emailList;
+    private final List<String> _failureEmailList;
     private final String _jobType;
     private final String _loggerPattern;
 
@@ -107,11 +109,12 @@ public class JobDescriptor {
         Collections.sort(this._writeResourceLocks);
 
         this._emailList = props.getStringList(NOTIFY_EMAIL);
+        this._failureEmailList = props.getStringList(NOTIFY_FAILURE_EMAIL);
     }
 
     /**
      * Add a dependency to this job
-     * 
+     *
      * @param dep
      */
     public void addDependency(JobDescriptor dep) {
@@ -134,7 +137,7 @@ public class JobDescriptor {
     public Props getProps() {
         return this._props;
     }
-    
+
     public boolean hasDependencies() {
         return this._dependencies.size() > 0;
     }
@@ -154,7 +157,7 @@ public class JobDescriptor {
     public String getFullPath() {
         return this._fullpath;
     }
-    
+
     @Override
     public String toString() {
         return String.format(
@@ -186,10 +189,14 @@ public class JobDescriptor {
         return _emailList;
     }
 
+    public List<String> getEmailFailureNotificationList() {
+        return _failureEmailList;
+    }
+
     public String getJobType() {
         return _jobType;
     }
-    
+
     public String getSenderEmail() {
         return _sourceEmailList;
     }

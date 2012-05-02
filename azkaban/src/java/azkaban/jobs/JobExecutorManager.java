@@ -438,6 +438,8 @@ public class JobExecutorManager {
                 emailList = jobDescriptor.getEmailNotificationList();
                 final List<String> finalEmailList = emailList;
 
+                final List<String> failedEmailList = jobDescriptor.getEmailFailureNotificationList();
+
                 senderAddress = jobDescriptor.getSenderEmail();
                 final String senderEmail = senderAddress;
 
@@ -481,14 +483,14 @@ public class JobExecutorManager {
                                     sendErrorEmail(runningJob,
                                                    flow.getExceptions(),
                                                    senderEmail,
-                                                   finalEmailList);
+                                                   failedEmailList);
                                     break;
                                 default:
                                     sendErrorEmail(runningJob,
                                                    new RuntimeException(String.format("Got an unknown status[%s]",
                                                                                       status)),
                                                    senderEmail,
-                                                   finalEmailList);
+                                                   failedEmailList);
                             }
                         } catch(RuntimeException e) {
                             logger.warn("Exception caught while saving flow/sending emails", e);
