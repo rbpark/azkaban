@@ -20,10 +20,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import azkaban.app.JobDescriptor;
 
 public class JavaProcessJob extends ProcessJob {
+    private static final Logger log = Logger
+            .getLogger(JavaProcessJob.class);
+    
 	public static final String CLASSPATH = "classpath";
+	public static final String GLOBAL_CLASSPATH = "global.classpath";
 	public static final String JAVA_CLASS = "java.class";
 	public static final String INITIAL_MEMORY_SIZE = "Xms";
 	public static final String MAX_MEMORY_SIZE = "Xmx";
@@ -73,22 +79,34 @@ public class JavaProcessJob extends ProcessJob {
 
 	protected List<String> getClassPaths() {
 		List<String> classPaths = getProps().getStringList(CLASSPATH, null, ",");
+
+	    ArrayList<String> classpathList = new ArrayList<String>(classPaths);
+	    
+	    // Adding global properties used system wide.
+        if (getProps().containsKey(GLOBAL_CLASSPATH)) {
+            List<String> globalClasspath = getProps().getStringList(GLOBAL_CLASSPATH);
+            for (String global: globalClasspath) {
+                log.info("Adding to global classpath:" + global);
+                classpathList.add(global);
+            }
+        }
 		
 		if (classPaths == null) {
 			File path = new File(getPath());
 			File parent = path.getParentFile();
-			classPaths = new ArrayList<String>();
+			
 			for (File file : parent.listFiles()) {
 				if (file.getName().endsWith(".jar")) {
-					classPaths.add(file.getName());
+	                log.info("Adding to classpath:" + file.getName());
+	                classpathList.add(file.getName());
 				}
 			}
-
-			return classPaths;
+		}
+		else {
+		    classpathList.addAll(classPaths);
 		}
 
-		// inserting class path in a non-immutable list.
-		return new ArrayList<String>(classPaths);
+		return classpathList;
 	}
 
 	protected String getInitialMemorySize() {

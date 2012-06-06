@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import azkaban.app.JobDescriptor;
+
 public class JavaJob extends JavaProcessJob {
 
 	public static final String RUN_METHOD_PARAM = "method.run";
@@ -37,7 +38,6 @@ public class JavaJob extends JavaProcessJob {
 	private String _progressMethod;
 
 	private Object _javaObject = null;
-	private JobDescriptor _descriptor;
 
 	public JavaJob(JobDescriptor descriptor) {
 		super(descriptor);

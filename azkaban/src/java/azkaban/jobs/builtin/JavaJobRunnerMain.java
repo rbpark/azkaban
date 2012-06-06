@@ -92,8 +92,13 @@ public class JavaJobRunnerMain {
             }
             _logger.info("Class name " + className);
 
-            // Create the object.
-            _javaObject = getObject(_jobName, className, prop);
+            // Create the object using proxy
+            if (SecurityUtils.shouldProxy(prop)) {
+                _javaObject = getObjectAsProxyUser(prop, _logger, _jobName, className);
+            }
+            else {
+                _javaObject = getObject(_jobName, className, prop);
+            }
             if(_javaObject == null) {
                 _logger.info("Could not create java object to run job: " + className);
                 throw new Exception("Could not create running object");
@@ -223,6 +228,17 @@ public class JavaJobRunnerMain {
         }
     }
 
+    private static Object getObjectAsProxyUser(final Properties prop, Logger logger, final String jobName, final String className) throws Exception{
+        Object obj = SecurityUtils.getProxiedUser(prop, logger, new Configuration()).doAs(new PrivilegedExceptionAction<Object>() {
+            @Override
+            public Object run() throws Exception {
+                return getObject(jobName, className, prop);
+            }
+          });
+        
+        return obj;
+    }
+    
     private static Object getObject(String jobName, String className, Properties properties)
             throws Exception {
         Class<?> runningClass = JavaJobRunnerMain.class.getClassLoader().loadClass(className);
