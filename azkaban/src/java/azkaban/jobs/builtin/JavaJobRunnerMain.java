@@ -228,7 +228,7 @@ public class JavaJobRunnerMain {
         }
     }
 
-    private static Object getObjectAsProxyUser(final Properties prop, Logger logger, final String jobName, final String className) throws Exception{
+    private static Object getObjectAsProxyUser(final Properties prop, final Logger logger, final String jobName, final String className) throws Exception{
         Object obj = SecurityUtils.getProxiedUser(prop, logger, new Configuration()).doAs(new PrivilegedExceptionAction<Object>() {
             @Override
             public Object run() throws Exception {

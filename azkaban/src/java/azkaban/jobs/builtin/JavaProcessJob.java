@@ -29,7 +29,7 @@ public class JavaProcessJob extends ProcessJob {
             .getLogger(JavaProcessJob.class);
     
 	public static final String CLASSPATH = "classpath";
-	public static final String GLOBAL_CLASSPATH = "global.classpath";
+	public static final String GLOBAL_CLASSPATH = "global.classpaths";
 	public static final String JAVA_CLASS = "java.class";
 	public static final String INITIAL_MEMORY_SIZE = "Xms";
 	public static final String MAX_MEMORY_SIZE = "Xmx";
@@ -80,8 +80,7 @@ public class JavaProcessJob extends ProcessJob {
 	protected List<String> getClassPaths() {
 		List<String> classPaths = getProps().getStringList(CLASSPATH, null, ",");
 
-	    ArrayList<String> classpathList = new ArrayList<String>(classPaths);
-	    
+	    ArrayList<String> classpathList = new ArrayList<String>();
 	    // Adding global properties used system wide.
         if (getProps().containsKey(GLOBAL_CLASSPATH)) {
             List<String> globalClasspath = getProps().getStringList(GLOBAL_CLASSPATH);
@@ -97,7 +96,7 @@ public class JavaProcessJob extends ProcessJob {
 			
 			for (File file : parent.listFiles()) {
 				if (file.getName().endsWith(".jar")) {
-	                log.info("Adding to classpath:" + file.getName());
+	                //log.info("Adding to classpath:" + file.getName());
 	                classpathList.add(file.getName());
 				}
 			}
