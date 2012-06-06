@@ -78,7 +78,12 @@ public class JobDetailServlet extends AbstractAzkabanServlet {
         		page.add("tab", "logs");
         	}
             
+        	// Reduce
             List<JobExecution> execs = jobManager.loadJobExecutions(jobId);
+            if (execs.size() > 500) {
+                execs = execs.subList(0, 500);
+            }
+
             int successes = 0;
             for(JobExecution exec: execs)
                 if(exec.isSucceeded())
