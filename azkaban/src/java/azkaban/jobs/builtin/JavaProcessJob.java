@@ -23,6 +23,7 @@ import java.util.List;
 import azkaban.app.JobDescriptor;
 
 public class JavaProcessJob extends ProcessJob {
+    public static final String GLOBAL_CLASSPATH="global.classpaths";
 	public static final String CLASSPATH = "classpath";
 	public static final String JAVA_CLASS = "java.class";
 	public static final String INITIAL_MEMORY_SIZE = "Xms";
@@ -71,25 +72,35 @@ public class JavaProcessJob extends ProcessJob {
 		return "-cp " + createArguments(classPath, ":") + " ";
 	}
 
-	protected List<String> getClassPaths() {
-		List<String> classPaths = getProps().getStringList(CLASSPATH, null, ",");
-		
-		if (classPaths == null) {
-			File path = new File(getPath());
-			File parent = path.getParentFile();
-			classPaths = new ArrayList<String>();
-			for (File file : parent.listFiles()) {
-				if (file.getName().endsWith(".jar")) {
-					classPaths.add(file.getName());
-				}
-			}
+    protected List<String> getClassPaths() {
+        List<String> classPaths = getProps().getStringList(CLASSPATH, null, ",");
 
-			return classPaths;
-		}
+        ArrayList<String> classpathList = new ArrayList<String>();
+        // Adding global properties used system wide.
+        if (getProps().containsKey(GLOBAL_CLASSPATH)) {
+            List<String> globalClasspath = getProps().getStringList(GLOBAL_CLASSPATH);
+            for (String global: globalClasspath) {
+                classpathList.add(global);
+            }
+        }
+        
+        if (classPaths == null) {
+            File path = new File(getPath());
+            File parent = path.getParentFile();
+            
+            for (File file : parent.listFiles()) {
+                if (file.getName().endsWith(".jar")) {
+                    //log.info("Adding to classpath:" + file.getName());
+                    classpathList.add(file.getName());
+                }
+            }
+        }
+        else {
+            classpathList.addAll(classPaths);
+        }
 
-		// inserting class path in a non-immutable list.
-		return new ArrayList<String>(classPaths);
-	}
+        return classpathList;
+    }
 
 	protected String getInitialMemorySize() {
 		return getProps().getString(INITIAL_MEMORY_SIZE,
