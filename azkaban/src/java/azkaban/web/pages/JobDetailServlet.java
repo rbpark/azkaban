@@ -78,10 +78,19 @@ public class JobDetailServlet extends AbstractAzkabanServlet {
         		page.add("tab", "logs");
         	}
             
+        	int logRetention = jdesc.getProps().getInt("log.retention", -1);
+        	
         	// Reduce
             List<JobExecution> execs = jobManager.loadJobExecutions(jobId);
-            if (execs.size() > 500) {
-                execs = execs.subList(0, 500);
+            if (logRetention > 0 && execs.size() > logRetention + 50) {
+                synchronized(jdesc) {
+                    if (execs.size() > logRetention + 50) {
+                        logger.info("Retention cleaning");
+                        List<JobExecution> clearList = execs.subList(logRetention, execs.size());
+                        jobManager.cleanupLogs(clearList);
+                        execs = execs.subList(0, logRetention);
+                    }
+                }
             }
 
             int successes = 0;
