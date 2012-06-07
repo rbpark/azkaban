@@ -16,6 +16,8 @@
 
 package azkaban.jobs;
 
+import java.io.File;
+
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
@@ -33,6 +35,7 @@ public class JobExecution {
     private boolean succeeded;
     private String log;
     private final boolean ignoreDependencies;
+    private File logDir = null;
 
     public JobExecution(String id, DateTime start, DateTime end, boolean succeeded, boolean ignoreDependecies, String log) {
         super();
@@ -44,6 +47,18 @@ public class JobExecution {
         this.ignoreDependencies = ignoreDependecies;
     }
 
+    public JobExecution(String id, DateTime start, DateTime end, boolean succeeded, boolean ignoreDependecies, String log, File logDir) {
+        super();
+        this.id = id;
+        this.startTime = start;
+        this.endTime = end;
+        this.succeeded = succeeded;
+        this.log = log;
+        this.ignoreDependencies = ignoreDependecies;
+        this.setLogDir(logDir);
+    }
+
+    
     public JobExecution(String jobName, DateTime start, boolean ignoreDependecies) {
         this(jobName, start, null, false, ignoreDependecies, null);
     }
@@ -97,4 +112,12 @@ public class JobExecution {
 	public boolean isDependencyIgnored() {
 		return ignoreDependencies;
 	}
+
+    public File getLogDir() {
+        return logDir;
+    }
+
+    public void setLogDir(File logDir) {
+        this.logDir = logDir;
+    }
 }

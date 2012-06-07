@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -193,7 +194,25 @@ public class JobManager {
         Collections.sort(execs, JOB_EXEC_COMPARATOR);
         return execs;
     }
+    
+  /**
+    * Dangerous hack. Should be called by job details.
+    * @param executions
+    */
+   public void cleanupLogs(List<JobExecution> executions) throws IOException{
 
+       Iterator<JobExecution> iter = executions.iterator();
+       while (iter.hasNext()) {
+           JobExecution exec = iter.next();
+           File file = exec.getLogDir();
+           if (file.exists()) {
+               logger.info("Cleaning log " + file.getPath());
+               FileUtils.deleteDirectory(file);
+           }
+       }
+
+   }
+    
     private List<JobExecution> loadJobExecutions(String jobName, File jobDir) throws IOException {
         List<JobExecution> execs = new ArrayList<JobExecution>();
         File[] files = jobDir.listFiles();
@@ -222,12 +241,15 @@ public class JobManager {
                 }
                 String logFile = jobName + File.separator + execDir.getName() + File.separator
                                  + jobName + "." + execDir.getName() + ".log";
+
                 execs.add(new JobExecution(jobName,
                                            start == null ? dirDate : start,
                                            end,
                                            succeeded,
                                            false,
-                                           logFile));
+                                           logFile,
+                                           execDir
+                        ));
             }
         }
         return execs;
