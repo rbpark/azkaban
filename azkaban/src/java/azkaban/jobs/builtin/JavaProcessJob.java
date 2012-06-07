@@ -29,6 +29,7 @@ public class JavaProcessJob extends ProcessJob {
 	public static final String INITIAL_MEMORY_SIZE = "Xms";
 	public static final String MAX_MEMORY_SIZE = "Xmx";
 	public static final String MAIN_ARGS = "main.args";
+	public static final String GLOBAL_JVM_PARAMS = "global.jvm.args";
 	public static final String JVM_PARAMS = "jvm.args";
 
 	public static final String DEFAULT_INITIAL_MEMORY_SIZE = "64M";
@@ -116,7 +117,13 @@ public class JavaProcessJob extends ProcessJob {
 	}
 
 	protected String getJVMArguments() {
-		return getProps().getString(JVM_PARAMS, "");
+	    String globalJVMArgs = getProps().getString(GLOBAL_JVM_PARAMS, null);
+	    
+	    if (globalJVMArgs == null) {
+	        return getProps().getString(JVM_PARAMS, "");
+	    }
+
+		return globalJVMArgs + " " + getProps().getString(JVM_PARAMS, "");
 	}
 
 	protected String createArguments(List<String> arguments, String separator) {
