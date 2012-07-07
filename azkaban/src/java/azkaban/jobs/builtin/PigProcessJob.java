@@ -30,6 +30,7 @@ import static azkaban.util.SecurityUtils.PROXY_KEYTAB_LOCATION;
 import static azkaban.util.SecurityUtils.PROXY_USER;
 import static azkaban.util.SecurityUtils.TO_PROXY;
 import static azkaban.util.SecurityUtils.shouldProxy;
+import static azkaban.jobs.builtin.SecurePigWrapper.OBTAIN_BINARY_TOKEN;
 
 public class PigProcessJob extends JavaProcessJob {
     
@@ -73,6 +74,10 @@ public class PigProcessJob extends JavaProcessJob {
       secure = " -D" + PROXY_USER + "=" + p.getProperty(PROXY_USER);
       secure += " -D" + PROXY_KEYTAB_LOCATION + "=" + p.getProperty(PROXY_KEYTAB_LOCATION);
       secure += " -D" + TO_PROXY + "=" + p.getProperty(TO_PROXY);
+      String extraToken = p.getProperty(OBTAIN_BINARY_TOKEN);
+      if(extraToken != null) {
+        secure += " -D" + OBTAIN_BINARY_TOKEN + "=" + extraToken;
+      }
       info("Secure settings = " + secure);
       args += secure;
     } else {
