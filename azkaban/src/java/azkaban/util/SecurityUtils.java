@@ -41,7 +41,7 @@ public class SecurityUtils {
       throw new IllegalArgumentException("toProxy can't be null");
     }
     if(conf == null) {
-      throw new IllegalAccessError("conf can't be null");
+      throw new IllegalArgumentException("conf can't be null");
     }
 
     if (loginUser == null) {
