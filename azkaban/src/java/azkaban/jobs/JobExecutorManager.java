@@ -438,7 +438,9 @@ public class JobExecutorManager {
                 emailList = jobDescriptor.getEmailNotificationList();
                 final List<String> finalEmailList = emailList;
 
-                final List<String> failedEmailList = jobDescriptor.getEmailFailureNotificationList();
+                final List<String> failedEmailList = new ArrayList<String>();
+                failedEmailList.addAll(jobDescriptor.getEmailFailureNotificationList());
+                failedEmailList.addAll(finalEmailList);
 
                 senderAddress = jobDescriptor.getSenderEmail();
                 final String senderEmail = senderAddress;
