@@ -76,10 +76,10 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 		        <div class="jobdesc">
 		          <div>
 		            <span class="h3like">Job Name</span> 
-		            <input id="jobname" name="job_name" type="text" value="$!job.id"/><br/>
+		            <input id="jobname" name="job_name" type="text" value="$!job.id" disabled="disabled"/><br/>
 		          </div>
 		          <div>
-		            <span class="h3like">Path</span> <input id="editPath" name="job_path" type="text" value="$!job.path" />
+		            <span class="h3like">Path</span> <input id="editPath" name="job_path" type="text" value="$!job.path" disabled="disabled"/>
 		          </div>
 		        </div>
 		   </div>
